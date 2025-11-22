@@ -38,6 +38,40 @@ io.on('connection', (socket) => {
     if (!player) return;
     player.x = data.x;
     player.y = data.y;
+
+    const radius = 10;
+
+    // Check collision with other players
+    for (const id in players){
+      if(id === socket.id) continue; // Skip yourself
+      const other = players[id];
+
+      const dx = player.x - other.x;
+      const dy = player.y - other.y;
+      const dist = Math.sqrt(dx*dx + dy*dy);
+
+      if (dist< radius *2){
+        // Distance too small -> calculate push-out
+        const overlap = (radius * 2) - dist;
+
+        // Normalize direction
+        const nx = dx / dist;
+        const ny = dy / dist;
+
+        // Push this player away
+        player.x += nx * overlap / 2;
+        player.y += ny * overlap / 2;
+
+        // Optional: Push the other player too
+        other.x -= nx * overlap / 2;
+        other.y -= ny * overlap / 2;
+
+      }
+
+    }
+
+
+    // Broadcast final corrected position
     io.emit('playerMoved', { id: socket.id, x: player.x, y: player.y });
   });
 
