@@ -40,10 +40,14 @@ socket.on('playerMoved', (data) => {
 function update(){
 
   const speed = 10;
+  const player = players[socket.id];
   if (keys['ArrowUp']) player.y -= player.speed;
   if (keys['ArrowDown']) player.y += player.speed;
   if (keys['ArrowLeft']) player.x -= player.speed;
   if (keys['ArrowRight']) player.x += player.speed;
+
+  //send player position to server
+  socket.emit('playerMovement', { x: player.x, y: player.y});
 }
 
 function draw() {
