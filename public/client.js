@@ -55,7 +55,6 @@ function draw() {
     ctx.arc(p.x, p.y, 10, 0, Math.PI * 2);
     ctx.fill();
   }
-  requestAnimationFrame(draw);
 }
 
 function gameLoop(){
