@@ -5,7 +5,18 @@ const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
+const keys = {};
+
+document.addEventListener('keydown', (e) => {
+  keys[e.key] = true;
+})
+
+document.addEventListener('keyup', (e) => {
+  keys[e.key] = false;
+})
+
 let players = {};
+
 
 socket.on('currentPlayers', (serverPlayers) => {
   players = serverPlayers;
@@ -28,10 +39,10 @@ socket.on('playerMoved', (data) => {
 
 window.addEventListener('keydown', (e) => {
   const speed = 10;
-  if (e.key === 'ArrowUp') socket.emit('move', { x: 0, y: -speed });
-  if (e.key === 'ArrowDown') socket.emit('move', { x: 0, y: speed });
-  if (e.key === 'ArrowLeft') socket.emit('move', { x: -speed, y: 0 });
-  if (e.key === 'ArrowRight') socket.emit('move', { x: speed, y: 0 });
+  if (keys['ArrowUp']) player.y -= player.speed;
+  if (keys['ArrowDown']) player.y += player.speed;
+  if (keys['ArrowLeft']) player.x -= player.speed;
+  if (keys['ArrowRight']) player.x += player.speed;
 });
 
 function draw() {
