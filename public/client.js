@@ -31,6 +31,9 @@ socket.on('playerDisconnected', (id) => {
 });
 
 socket.on('playerMoved', (data) => {
+  // don't overwrite your own position
+  if (data.id === socket.id) return;
+  
   if (players[data.id]) {
     players[data.id].x = data.x;
     players[data.id].y = data.y;
