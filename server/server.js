@@ -19,7 +19,12 @@ io.on('connection', (socket) => {
   console.log('a user connected:', socket.id);
 
   // Add player
-  players[socket.id] = { x: Math.random() * 800, y: Math.random() * 600, color: '#' + ((1<<24)*Math.random() | 0).toString(16) };
+  players[socket.id] = { 
+      x: Math.random() * 800, 
+      y: Math.random() * 600, 
+      color: '#' + ((1<<24)*Math.random() | 0).toString(16) 
+      speed: 10
+    };
 
   // Send all players to new client
   socket.emit('currentPlayers', players);
