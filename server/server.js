@@ -23,7 +23,7 @@ io.on('connection', (socket) => {
       x: Math.random() * 800, 
       y: Math.random() * 600, 
       color: '#' + ((1<<24)*Math.random() | 0).toString(16), 
-      speed: 10
+      speed: 5
     };
 
   // Send all players to new client
