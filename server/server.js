@@ -22,7 +22,8 @@ io.on('connection', (socket) => {
   players[socket.id] = { 
       x: Math.random() * 800, 
       y: Math.random() * 600, 
-      color: '#' + ((1<<24)*Math.random() | 0).toString(16) 
+      color: '#' + ((1<<24)*Math.random() | 0).toString(16), 
+      speed: 10
     };
 
   // Send all players to new client

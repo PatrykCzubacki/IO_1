@@ -41,7 +41,6 @@ function update(){
 
   const player = players[socket.id];
   if(!player) return
-  const speed = 10;
   if (keys['ArrowUp']) player.y -= player.speed;
   if (keys['ArrowDown']) player.y += player.speed;
   if (keys['ArrowLeft']) player.x -= player.speed;
