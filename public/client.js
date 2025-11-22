@@ -37,13 +37,14 @@ socket.on('playerMoved', (data) => {
   }
 });
 
-window.addEventListener('keydown', (e) => {
+function update(){
+
   const speed = 10;
   if (keys['ArrowUp']) player.y -= player.speed;
   if (keys['ArrowDown']) player.y += player.speed;
   if (keys['ArrowLeft']) player.x -= player.speed;
   if (keys['ArrowRight']) player.x += player.speed;
-});
+}
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
@@ -56,4 +57,11 @@ function draw() {
   }
   requestAnimationFrame(draw);
 }
-draw();
+
+function gameLoop(){
+  update();
+  draw();
+  requestAnimationFrame(gameLoop);
+}
+
+requestAnimationFrame(gameLoop);
