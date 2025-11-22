@@ -41,7 +41,7 @@ io.on('connection', (socket) => {
 
     const radius = 10;
 
-    // Check collision with other players
+    // Block movement if collising with another player
     for (const id in players){
       if(id === socket.id) continue; // Skip yourself
       const other = players[id];
@@ -54,17 +54,13 @@ io.on('connection', (socket) => {
         // Distance too small -> calculate push-out
         const overlap = (radius * 2) - dist;
 
-        // Normalize direction
+        // Normalize push direction
         const nx = dx / dist;
         const ny = dy / dist;
 
-        // Push this player away
-        player.x += nx * overlap / 2;
-        player.y += ny * overlap / 2;
-
-        // Optional: Push the other player too
-        other.x -= nx * overlap / 2;
-        other.y -= ny * overlap / 2;
+        // Move the player back so they cannot overlap
+        player.x += nx * overlap;
+        player.y += ny * overlap;
 
       }
 
