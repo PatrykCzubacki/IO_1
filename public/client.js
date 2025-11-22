@@ -27,7 +27,7 @@ socket.on('playerMoved', (data) => {
 });
 
 window.addEventListener('keydown', (e) => {
-  const speed = 5;
+  const speed = 10;
   if (e.key === 'ArrowUp') socket.emit('move', { x: 0, y: -speed });
   if (e.key === 'ArrowDown') socket.emit('move', { x: 0, y: speed });
   if (e.key === 'ArrowLeft') socket.emit('move', { x: -speed, y: 0 });
