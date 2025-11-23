@@ -22,8 +22,8 @@ socket.on('playerDisconnected', (id) => delete players[id]);
 
 socket.on('playerMoved', (data) => {  
   if (!players[data.id]) return;
-    players[data.id].x = data.x;
-    players[data.id].y = data.y;
+    players[data.id].targetX = data.x;
+    players[data.id].targetY = data.y;
   
 });
 
@@ -59,6 +59,15 @@ function draw() {
 
   for (const id in players) {
     const p = players[id];
+    if (!p.targetX){
+      p.targetX = p.x;
+      p.targetY = p.y;
+    }
+
+    // Interpolate 0.2 = smoothing factor
+    p.x += (p.targetX - p.x) * 0.2;
+    p.y += (p.targetY - p.y) * 0.2;
+
     ctx.fillStyle = p.color;
     ctx.beginPath();
     ctx.arc(p.x, p.y, 10, 0, Math.PI * 2);
