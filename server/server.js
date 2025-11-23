@@ -58,9 +58,12 @@ io.on('connection', (socket) => {
         const nx = dx / dist;
         const ny = dy / dist;
 
-        // Move the player back so they cannot overlap
-        player.x += nx * overlap;
-        player.y += ny * overlap;
+        // Push both players equally
+        player.x += nx * overlap / 2;
+        player.y += ny * overlap / 2;
+
+        other.x += nx * overlap / 2;
+        other.y += ny * overlap / 2;
 
       }
 
@@ -69,6 +72,7 @@ io.on('connection', (socket) => {
 
     // Broadcast final corrected position
     io.emit('playerMoved', { id: socket.id, x: player.x, y: player.y });
+    io.emit('playerMoved', { id: id, x: other.x, y: other.y });
   });
 
   // Remove player
