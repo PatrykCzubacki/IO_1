@@ -12,7 +12,7 @@ document.addEventListener('keydown', (e) => keys[e.key] = true);
 document.addEventListener('keyup', (e) => keys[e.key] = false);
 
 
-socket.on('currentPlayers', (serverPlayers) => players = serverPlayers;);
+socket.on('currentPlayers', (serverPlayers) => players = serverPlayers);
 
 socket.on('newPlayer', (player) => {
   players[player.id] = player;
