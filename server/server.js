@@ -41,9 +41,7 @@ io.on('connection', (socket) => {
     const oldX = player.x;
     const oldY= player.y;
 
-    //Apply movement
-    player.x = data.x;
-    player.y = data.y;
+
 
     const speed = player.speed;
 
