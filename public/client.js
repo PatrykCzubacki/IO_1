@@ -50,7 +50,7 @@ function update(){
   if (keys['ArrowRight']) player.x += player.speed;
 
   //send player position to server
-  socket.emit('playerMovement', { x: player.x, y: player.y});
+  socket.emit('playerMovement', { dx: moveX, dy: moveY});
 }
 
 function draw() {

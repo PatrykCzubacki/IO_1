@@ -45,13 +45,20 @@ io.on('connection', (socket) => {
     player.x = data.x;
     player.y = data.y;
 
+    const speed = player.speed;
+
+    // Apply movement on server
+    player.x += data.dx * speed;
+    player.y += data.dy * speed;
+
     const radius = 10;
 
-    // Block movement if collising with another player
+    // Collision block
     for (const id in players){
       if(id === socket.id) continue; // Skip yourself
 
       const other = players[id];
+
       const dx = player.x - other.x;
       const dy = player.y - other.y;
       const dist = Math.sqrt(dx*dx + dy*dy);
@@ -65,7 +72,7 @@ io.on('connection', (socket) => {
 
     }
 
-    // Always broadcast moving player (if no collision)
+    // Now send authoritative position
     io.emit('playerMoved', {id: socket.id, x: player.x, y: player.y});
     
   });
