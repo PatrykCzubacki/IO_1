@@ -62,17 +62,20 @@ io.on('connection', (socket) => {
         player.x += nx * overlap / 2;
         player.y += ny * overlap / 2;
 
-        other.x += nx * overlap / 2;
-        other.y += ny * overlap / 2;
+        other.x -= nx * overlap / 2;
+        other.y -= ny * overlap / 2;
+
+        // Broadcast both players immediately
+        io.emit('playerMoved', { id: socket.id, x: player.x, y: player.y });
+        io.emit('playerMoved', { id: id, x: other.x, y: other.y });
 
       }
 
     }
 
-
-    // Broadcast final corrected position
-    io.emit('playerMoved', { id: socket.id, x: player.x, y: player.y });
-    io.emit('playerMoved', { id: id, x: other.x, y: other.y });
+    // Always broadcast moving player (if no collision)
+    io.emit('playerMoved', {id: socket.id, x: player.x, y: player.y});
+    
   });
 
   // Remove player
