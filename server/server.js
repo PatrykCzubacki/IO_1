@@ -36,6 +36,12 @@ io.on('connection', (socket) => {
   socket.on('playerMovement', (data) => {
     const player = players[socket.id];
     if (!player) return;
+
+    // Save old position
+    const oldX = player.x;
+    const oldY= player.y;
+
+    //Apply movement
     player.x = data.x;
     player.y = data.y;
 
@@ -44,31 +50,17 @@ io.on('connection', (socket) => {
     // Block movement if collising with another player
     for (const id in players){
       if(id === socket.id) continue; // Skip yourself
-      const other = players[id];
 
+      const other = players[id];
       const dx = player.x - other.x;
       const dy = player.y - other.y;
       const dist = Math.sqrt(dx*dx + dy*dy);
 
       if (dist< radius *2){
-        // Distance too small -> calculate push-out
-        const overlap = (radius * 2) - dist;
-
-        // Normalize push direction
-        const nx = dx / dist;
-        const ny = dy / dist;
-
-        // Push both players equally
-        player.x += nx * overlap / 2;
-        player.y += ny * overlap / 2;
-
-        other.x -= nx * overlap / 2;
-        other.y -= ny * overlap / 2;
-
-        // Broadcast both players immediately
-        io.emit('playerMoved', { id: socket.id, x: player.x, y: player.y });
-        io.emit('playerMoved', { id: id, x: other.x, y: other.y });
-
+          // Collision -> revert movement
+          player.x = oldX;
+          player.y = oldY;
+          break;
       }
 
     }
