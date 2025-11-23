@@ -6,55 +6,48 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 const keys = {};
-
-document.addEventListener('keydown', (e) => {
-  keys[e.key] = true;
-})
-
-document.addEventListener('keyup', (e) => {
-  keys[e.key] = false;
-})
-
 let players = {};
 
+document.addEventListener('keydown', (e) => keys[e.key] = true);
+document.addEventListener('keyup', (e) => keys[e.key] = false);
 
-socket.on('currentPlayers', (serverPlayers) => {
-  players = serverPlayers;
-});
+
+socket.on('currentPlayers', (serverPlayers) => players = serverPlayers;);
 
 socket.on('newPlayer', (player) => {
   players[player.id] = player;
 });
 
-socket.on('playerDisconnected', (id) => {
-  delete players[id];
-});
+socket.on('playerDisconnected', (id) => delete players[id]);
 
-socket.on('playerMoved', (data) => {
-  // don't overwrite your own position
-  if (data.id === socket.id) return;
-  
-  if (players[data.id]) {
+socket.on('playerMoved', (data) => {  
+  if (!players[data.id]) return;
     players[data.id].x = data.x;
     players[data.id].y = data.y;
-  }
+  
 });
 
 function update(){
 
   const player = players[socket.id];
   if(!player) return
-  if (keys['ArrowUp']) player.y -= player.speed;
-  if (keys['ArrowDown']) player.y += player.speed;
-  if (keys['ArrowLeft']) player.x -= player.speed;
-  if (keys['ArrowRight']) player.x += player.speed;
+
+  //movement direction
+  let dx = 0;
+  let dy = 0;
+
+  if (keys['ArrowUp']) dy = -1;
+  if (keys['ArrowDown']) dy = 1;
+  if (keys['ArrowLeft']) dx = -1;
+  if (keys['ArrowRight']) dx = 1;
 
   //send player position to server
-  socket.emit('playerMovement', { dx: moveX, dy: moveY});
+  socket.emit('playerMovement', { dx, dy});
 }
 
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+
   for (const id in players) {
     const p = players[id];
     ctx.fillStyle = p.color;
@@ -70,4 +63,4 @@ function gameLoop(){
   requestAnimationFrame(gameLoop);
 }
 
-requestAnimationFrame(gameLoop);
+gameLoop();
