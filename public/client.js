@@ -27,6 +27,10 @@ socket.on('playerMoved', (data) => {
   
 });
 
+
+let lastMove = 0;
+const MOVE_INTERVAL = 50; // ms = 20 updates/sec
+
 function update(){
 
   const player = players[socket.id];
@@ -41,8 +45,13 @@ function update(){
   if (keys['ArrowLeft']) dx = -1;
   if (keys['ArrowRight']) dx = 1;
 
-  //send player position to server
-  socket.emit('playerMovement', { dx, dy});
+  const now = Date.now();
+  if (now - lastMove > MOVE_INTERVAL)
+  {
+    //send player position to server
+    socket.emit('playerMovement', { dx, dy});
+    lastMove = now;
+  }
 }
 
 function draw() {

@@ -70,8 +70,12 @@ io.on('connection', (socket) => {
 
     }
 
-    // Now send authoritative position
-    io.emit('playerMoved', {id: socket.id, x: player.x, y: player.y});
+    
+    if (player.x !== oldX || player.t !== oldY){
+        // Now send authoritative position
+        io.emit('playerMoved', {id: socket.id, x: player.x, y: player.y});
+    }
+    
     
   });
 
