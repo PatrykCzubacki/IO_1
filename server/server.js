@@ -26,7 +26,7 @@ io.on('connection', (socket) => {
       dx: 0,
       dy: 0, 
       color: '#' + ((1<<24)*Math.random() | 0).toString(16), 
-      speed: 3 // Keep server speed LOW to acoid divergence
+      speed: 300 // Keep server speed LOW to acoid divergence
     };
 
   // Send all players to new client

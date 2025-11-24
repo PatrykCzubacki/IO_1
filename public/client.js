@@ -76,7 +76,7 @@ socket.on("stateUpdate", snapshot => {
   });
 
 let lastDx = 0, lastDy = 0;
-const SPEED = 3; // px per second (same as server)
+const SPEED = 300; // px per second (same as server)
 
 function sendInput(dx, dy){
   socket.emit("playerMovement", { dx, dy});
