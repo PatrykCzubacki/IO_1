@@ -24,11 +24,11 @@ function ensureRender(id, serverObj){
       color: serverObj.color || '#888',
       serverX: serverObj.x,
       serverY: serverObj.y,
-      isLocal: id === socket.id,
+      isLocal: id === socket.id
     };
   } else {
     // Update color if changed
-    renderPlayers[id].color = serverObj.color || renderPlayers[id].color;
+    renderPlayers[id].color = serverObj.color;
   }
 }
 
@@ -52,6 +52,10 @@ socket.on('playerDisconnected', id => {
   delete renderPlayers[id];
 });
 
+// ===================
+//  SERVER UPDATE
+// ===================
+
 // Authoritateive snapshot from server
 socket.on("stateUpdate", snapshot => {
   // Replace authoritative server state
@@ -65,7 +69,21 @@ socket.on("stateUpdate", snapshot => {
     // Store server authoritative coordinates for smooth reconciliation
     renderPlayers[id].serverX = s.x;
     renderPlayers[id].serverY = s.y;
+  
+
+// If this is the local player - RECONCILE
+if (id === socket.id){
+  // Snap to correct base state
+  r.x = s.x;
+  r.y = s.y;
+
+  // Reapply all yet-unconfirmed inputs
+  for (const inp of pendingInputs){
+    r.x += inp.dx * 5;
+    r.y += inp.dy * 5;
   }
+}
+}
 
   // Remove any render players that disappeared
   for (const id in renderPlayers){
@@ -73,7 +91,9 @@ socket.on("stateUpdate", snapshot => {
   }
 });
 
-let lastDx = 0, lastDy = 0;
+// ======================
+// INPUT + PREDICTION
+// ======================
 
 // Input sending & local prediction
 function sendInputAndPredict(){
@@ -89,19 +109,36 @@ function sendInputAndPredict(){
   if (keys['ArrowLeft']) dx = -1;
   if (keys['ArrowRight']) dx = 1;
 
-  // Only send network packet when input changes
-  if (dx !== lastDx || dy !== lastDy){
-    socket.emit('playerMovement', { dx, dy});
-    lastDx = dx;
-    lastDy = dy;
-  }
+  const input = { dx, dy, seq: inputSeq++ };
 
-  // Local prediction (instant)
+  // Send to server
+  socket.emit ("playerMovement", input);
+
+  // Perdict instantly
   const SPEED = 5;
   player.x += dx * SPEED;
   player.y += dy * SPEED;
-  
+
+  // Store so reconciliation can reapply them
+  pendingInputs.push(input);
 }
+
+// Server will confirm inputs by position
+socket.on("stateUpdate", snapshot => {
+    const player= renderPlayers[socket.id];
+    if (!player) return;
+
+    // Remove confirmed inputs
+    pendingInputs = pendingInputs.filter(inp => {
+      // Server doesn't send seq numbers, so keep all inouts
+      // (stable movement, no jitter)
+      return false;
+    });
+});
+
+// ===================
+// DRAW LOOP
+// ===================
 
 // Drawing & smoothing
 function draw() {
@@ -118,26 +155,7 @@ function draw() {
       // Move rendered towards server authoritative position
       r.x += (r.serverX - r.x) * SMOOTH;
       r.y += (r.serverY - r.y) * SMOOTH;
-    } else {
-      // Local player reconciliation 
-      const dx = r.serverX - r.x;
-      const dy = r.serverY - r.y;
-      const distSq = dx*dx + dy*dy;
-      const RECONCILE = 0.2;
-
-      // If the difference is small -> smoothly correct
-      if (distSq < 2000){
-        r.x += dx * RECONCILE;
-        r.y += dy * RECONCILE;
-      }
-      // If difference is big -> snap (teleport) to server
-      else {
-        r.x = r.serverX;
-        r.y = r.serverY;
-      }
-      
-      
-    }
+    } 
 
     // Draw
     ctx.fillStyle = r.color;
@@ -147,7 +165,10 @@ function draw() {
   }
 }
 
-// Main loop
+// ========================
+// MAIN LOOP
+// ========================
+
 function loop(){
   sendInputAndPredict();
   draw();
