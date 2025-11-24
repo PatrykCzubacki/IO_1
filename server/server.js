@@ -88,13 +88,6 @@ setInterval(() => {
       const dy = a.y - b.y;
       const distSq = dx * dx + dy * dy;
 
-      if (distSq === 0){
-        // Deterministic separation based on player ids
-        const dir = (a.id < b.id) ? -1 : 1;
-        a.x += dir * 0.1;
-        b.x -= dir * 0.1;
-        continue;
-      }
 
       const dist = Math.sqrt(distSq);
       if (dist < DIAMETER){

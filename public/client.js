@@ -90,7 +90,7 @@ function sendInputAndPredict(){
 
   // Local immediate prediction (very small step, predictable)
   // NOTE: server speed is 3 per tick; we approximate using per-frame factor
-  const LOCAL_PREDICT_SPEED = 3; // Should match server speed roughly
+  const LOCAL_PREDICT_SPEED = 5; // Should match server speed roughly
   player.x += dx * LOCAL_PREDICT_SPEED;
   player.y += dy * LOCAL_PREDICT_SPEED;
 }
@@ -116,9 +116,11 @@ function draw() {
       const dy = r.serverY - r.y;
       const distSq = dx*dx + dy*dy;
       const threshold = 400; // If very large difference, snap faster
-      const factor = distSq > threshold ? 0.5 : SMOOTH;
-      r.x += dx * factor;
-      r.y += dy * factor;
+      if (distSq > 1000){
+        r.x += r.serverX;
+        r.y += r.serverY;
+      }
+      
     }
 
     // Draw
