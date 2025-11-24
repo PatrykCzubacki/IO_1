@@ -87,12 +87,6 @@ function sendInputAndPredict(){
 
   // Send input every frame (tiny packets)
   socket.emit('playerMovement', { dx, dy});
-
-  // Local immediate prediction (very small step, predictable)
-  // NOTE: server speed is 3 per tick; we approximate using per-frame factor
-  const LOCAL_PREDICT_SPEED = 5; // Should match server speed roughly
-  player.x += dx * LOCAL_PREDICT_SPEED;
-  player.y += dy * LOCAL_PREDICT_SPEED;
 }
 
 // Drawing & smoothing
