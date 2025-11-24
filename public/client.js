@@ -59,6 +59,11 @@ socket.on("stateUpdate", snapshot => {
     const s = snapshot[id];
     ensureRender(id, s);
   }
+
+  // Remove missing players
+  for (const id in renderPlayers){
+    if(!snapshot[id]) delete renderPlayers[id];
+  }
   });
 
    // =====================
