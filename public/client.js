@@ -121,7 +121,7 @@ function draw() {
       const dx = r.serverX - r.x;
       const dy = r.serverY - r.y;
       const distSq = dx*dx + dy*dy;
-      const RECONSILE = 0.2;
+      const RECONCILE = 0.2;
 
       // If the difference is small -> smoothly correct
       if (distSq < 2000){
