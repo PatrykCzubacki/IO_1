@@ -111,15 +111,23 @@ function draw() {
       r.x += (r.serverX - r.x) * SMOOTH;
       r.y += (r.serverY - r.y) * SMOOTH;
     } else {
-      // Local player: reconciliation -- if server is far away, move a bit toward it
+      // Local player reconciliation 
       const dx = r.serverX - r.x;
       const dy = r.serverY - r.y;
       const distSq = dx*dx + dy*dy;
-      const threshold = 400; // If very large difference, snap faster
-      if (distSq > 1000){
-        r.x += r.serverX;
-        r.y += r.serverY;
+      const RECONCILE = 0.2;
+
+      // If the difference is small -> smoothly correct
+      if (distSq < 2000){
+        r.x += dx * RECONCILE;
+        r.y += dy * RECONCILE;
       }
+      // If difference is big -> snap (teleport) to server
+      else {
+        r.x = r.serverX;
+        r.y = r.serverY;
+      }
+      
       
     }
 
