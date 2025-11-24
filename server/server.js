@@ -89,13 +89,10 @@ setInterval(() => {
       const distSq = dx * dx + dy * dy;
 
       if (distSq === 0){
-        // Exact overlap - nudge randomly
-        const nudgex = (Math.random() - 0.5) * 0.1;
-        const nudgey = (Math.random() - 0.5) * 0.1;
-        a.x += nudgex;
-        a.y += nudgey;
-        b.x -= nudgex;
-        b.y -= nudgey;
+        // Deterministic separation based on player ids
+        const dir = (a.id < b.id) ? -1 : 1;
+        a.x += dir * 0.1;
+        b.x -= dir * 0.1;
         continue;
       }
 
