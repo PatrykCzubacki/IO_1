@@ -126,7 +126,7 @@ function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   // Smoothing factor for remote players and reconciliation on local
-  const SMOOTH = 0.15; // [0..1] higher = faster snap
+  const SMOOTH = 0.2; // [0..1] higher = faster snap
   const RECONCILE = 0.1;
 
   for (const id in renderPlayers) {
@@ -151,18 +151,19 @@ function draw() {
   }
 }
 
-let lastTime = performance.now();
 
 // ========================
 // MAIN LOOP
 // ========================
+
+let lastTime = performance.now();
 
 function loop(){
   const dt = (t - lastTime) / 1000; // seconds
   lastTime = t;
 
   predict(dt);
-  draw(dt);
+  draw();
   requestAnimationFrame(loop);
 }
 

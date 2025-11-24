@@ -63,13 +63,14 @@ const DIAMETER = RADIUS * 2;
 const WORLD = { w: 1200, h: 800}; //bounds
 
 setInterval(() => {
+  const dt = FRAME_TIME / 1000;
   // Move each player according to last known input
   for (const id in players){
     const p = players[id];
 
     // Apply input-driven movement
-    p.x += p.dx * p.speed;
-    p.y += p.dy * p.speed;
+    p.x += p.dx * p.speed * dt;
+    p.y += p.dy * p.speed * dt;
 
     // World bounds
     p.x = Math.max(RADIUS, Math.min(WORLD.w - RADIUS, p.x));
@@ -88,9 +89,7 @@ setInterval(() => {
       const dy = a.y - b.y;
       const distSq = dx * dx + dy * dy;
 
-
-      const dist = Math.sqrt(distSq);
-      if (dist < DIAMETER * DIAMETER){
+      if (distSq < DIAMETER * DIAMETER){
         const dist = Math.srqr(distSq) || 0.01;
         const overlap = DIAMETER - dist;
         const nx = dx / dist;
@@ -103,11 +102,6 @@ setInterval(() => {
         b.x -= nx * push;
         b.y -= ny * push;
 
-        // Clamp after push
-        a.x = Math.max(RADIUS, Math.min(WORLD.w - RADIUS, a.x));
-        a.y = Math.max(RADIUS, Math.min(WORLD.h - RADIUS, a.y));
-        b.x = Math.max(RADIUS, Math.min(WORLD.w - RADIUS, b.x));
-        b.y = Math.max(RADIUS, Math.min(WORLD.h - RADIUS, b.y));
       }
     }
   }
