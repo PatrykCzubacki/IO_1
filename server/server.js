@@ -41,7 +41,7 @@ io.on('connection', (socket) => {
 
       // Sanitize input
       p.dx = typeof input.dx === 'number' ? input.dx : 0;
-      p.dy = typeof input.dy === 'nu,ber' ? input.dy : 0;
+      p.dy = typeof input.dy === 'number' ? input.dy : 0;
   });
 
   // Remove player

@@ -47,7 +47,7 @@ socket.on('newPlayer', (player) => {
 
 socket.on('playerDisconnected', id => {
   delete players[id];
-  deleterrenderPlayers[id];
+  delete renderPlayers[id];
 });
 
 // Authoritateive snapshot from server
@@ -92,7 +92,7 @@ function sendInputAndPredict(){
   // NOTE: server speed is 3 per tick; we approximate using per-frame factor
   const LOCAL_PREDICT_SPEED = 3; // Should match server speed roughly
   player.x += dx * LOCAL_PREDICT_SPEED;
-  player.y += dy * LOCAL_PREFICT_SPEED;
+  player.y += dy * LOCAL_PREDICT_SPEED;
 }
 
 // Drawing & smoothing
@@ -141,5 +141,5 @@ requestAnimationFrame(loop);
 // Handle window resize
 window.addEventListener('resize',() => {
   canvas.width = window.innerWidth;
-  canvas.height = windows.innerHeight;
+  canvas.height = window.innerHeight;
 });
