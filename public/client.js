@@ -9,8 +9,6 @@ canvas.height = window.innerHeight;
 const keys = {};
 let players = {}; // state from server (authoritative values)
 let renderPlayers = {}; // local rendered positions and smoothing info
-let inputSeq = 0;
-let pendingInputs = [];
 
 document.addEventListener('keydown', (e) => keys[e.key] = true);
 document.addEventListener('keyup', (e) => keys[e.key] = false);
@@ -70,37 +68,29 @@ socket.on("stateUpdate", snapshot => {
     renderPlayers[id].serverX = s.x;
     renderPlayers[id].serverY = s.y;
   
+    // Remove missing
+    for (const id in renderPlayers){
+      if (!snapshot[id]) delete renderPlayers[id];
+    }
+  });
 
-// If this is the local player - RECONCILE
-if (id === socket.id){
-  // Snap to correct base state
-  r.x = s.x;
-  r.y = s.y;
+let lastDx = 0, lastDy = 0;
+const SPEED = 300; // px per second (same as server)
 
-  // Reapply all yet-unconfirmed inputs
-  for (const inp of pendingInputs){
-    r.x += inp.dx * 5;
-    r.y += inp.dy * 5;
-  }
+function sendInput(dx, dy){
+  socket.emit("playerMovement", { dx, dy});
 }
-}
-
-  // Remove any render players that disappeared
-  for (const id in renderPlayers){
-    if (!snapshot[id]) delete renderPlayers[id];
-  }
-});
 
 // ======================
-// INPUT + PREDICTION
+// PREDICTION
 // ======================
 
 // Input sending & local prediction
-function sendInputAndPredict(){
+function predict(dt){
   const player = renderPlayers[socket.id];
   if(!player) return;
 
-  //movement direction
+  // Movement direction
   let dx = 0;
   let dy = 0;
 
@@ -109,32 +99,23 @@ function sendInputAndPredict(){
   if (keys['ArrowLeft']) dx = -1;
   if (keys['ArrowRight']) dx = 1;
 
-  const input = { dx, dy, seq: inputSeq++ };
+  // Normalize diagonal
+  if (dx !== 0 && dy !== 0){
+    const inv = 1 / Math.sqrt(2);
+    dx *= inv;
+    dy *= inv;
+  }
 
-  // Send to server
-  socket.emit ("playerMovement", input);
+  if (dx !== lastDx || dy !== lastDy){
+    sendInput(dx,dy);
+    lastDx = dx;
+    lastDy = dy;
+  }
 
-  // Perdict instantly
-  const SPEED = 5;
-  player.x += dx * SPEED;
-  player.y += dy * SPEED;
+  // Local prediction
+  player.x += dx * SPEED * dt;
+  player.y += dy * SPEED * dt;
 
-  // Store so reconciliation can reapply them
-  pendingInputs.push(input);
-}
-
-// Server will confirm inputs by position
-socket.on("stateUpdate", snapshot => {
-    const player= renderPlayers[socket.id];
-    if (!player) return;
-
-    // Remove confirmed inputs
-    pendingInputs = pendingInputs.filter(inp => {
-      // Server doesn't send seq numbers, so keep all inouts
-      // (stable movement, no jitter)
-      return false;
-    });
-});
 
 // ===================
 // DRAW LOOP
@@ -145,18 +126,23 @@ function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
   // Smoothing factor for remote players and reconciliation on local
-  const SMOOTH = 0.2; // [0..1] higher = faster snap
+  const SMOOTH = 0.15; // [0..1] higher = faster snap
+  const RECONCILE = 0.1;
 
   for (const id in renderPlayers) {
     const r = renderPlayers[id];
 
-    // If this is not local player, smoothly interpolate toward server
-    if (id != socket.id){
-      // Move rendered towards server authoritative position
+    if (r.isLocal){
+      // Reconcile
+      const dx = r.serverX - r.x;
+      const dy = r.serverY - r.y;
+      r.x += dx * RECONCILE;
+      r.y += dy * RECONCILE;
+    } else{
       r.x += (r.serverX - r.x) * SMOOTH;
       r.y += (r.serverY - r.y) * SMOOTH;
-    } 
-
+    }
+    
     // Draw
     ctx.fillStyle = r.color;
     ctx.beginPath();
@@ -165,13 +151,18 @@ function draw() {
   }
 }
 
+let lastTime = performance.now();
+
 // ========================
 // MAIN LOOP
 // ========================
 
 function loop(){
-  sendInputAndPredict();
-  draw();
+  const dt = (t - lastTime) / 1000; // seconds
+  lastTime = t;
+
+  predict(dt);
+  draw(dt);
   requestAnimationFrame(loop);
 }
 
