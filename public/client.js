@@ -71,6 +71,8 @@ socket.on("stateUpdate", snapshot => {
   }
 });
 
+let lastDx = 0, lastDy = 0;
+
 // Input sending & local prediction
 function sendInputAndPredict(){
   const player = renderPlayers[socket.id];
@@ -85,8 +87,18 @@ function sendInputAndPredict(){
   if (keys['ArrowLeft']) dx = -1;
   if (keys['ArrowRight']) dx = 1;
 
-  // Send input every frame (tiny packets)
-  socket.emit('playerMovement', { dx, dy});
+  // Only send network packet when input changes
+  if (dx !== lastDx || dy !== lastDy){
+    socket.emit('playerMovement', { dx, dy});
+    lastDx = dx;
+    lastDy = dy;
+  }
+
+  // Local prediction (instant)
+  const SPEED = 5;
+  player.x += dx * SPEED;
+  player.y += dy * SPEED;
+  
 }
 
 // Drawing & smoothing
@@ -106,10 +118,9 @@ function draw() {
       r.y += (r.serverY - r.y) * SMOOTH;
     } else {
       // Local player reconciliation 
-      const dx = r.serverX - r.x;
-      const dy = r.serverY - r.y;
-      const distSq = dx*dx + dy*dy;
-      const RECONCILE = 0.2;
+      const dx = r.serverX;
+      const dy = r.serverY;
+
 
       // If the difference is small -> smoothly correct
       if (distSq < 2000){
