@@ -90,7 +90,7 @@ setInterval(() => {
       const distSq = dx * dx + dy * dy;
 
       if (distSq < DIAMETER * DIAMETER){
-        const dist = Math.srqr(distSq) || 0.01;
+        const dist = Math.sqrt(distSq) || 0.01;
         const overlap = DIAMETER - dist;
         const nx = dx / dist;
         const ny = dy / dist;

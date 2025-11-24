@@ -67,6 +67,7 @@ socket.on("stateUpdate", snapshot => {
     // Store server authoritative coordinates for smooth reconciliation
     renderPlayers[id].serverX = s.x;
     renderPlayers[id].serverY = s.y;
+  }
   
     // Remove missing
     for (const id in renderPlayers){
