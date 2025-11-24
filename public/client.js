@@ -116,7 +116,7 @@ function predict(dt){
   // Local prediction
   player.x += dx * SPEED * dt;
   player.y += dy * SPEED * dt;
-
+}
 
 // ===================
 // DRAW LOOP
