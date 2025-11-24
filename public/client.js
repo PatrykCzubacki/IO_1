@@ -114,8 +114,8 @@ function predict(dt){
   }
 
   // Local prediction
-  player.x += dx * SPEED * dt;
-  player.y += dy * SPEED * dt;
+  player.x += dx * SPEED * dt * 60;
+  player.y += dy * SPEED * dt * 60;
 }
 
 // ===================
