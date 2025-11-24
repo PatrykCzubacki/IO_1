@@ -20,11 +20,8 @@ socket.on('newPlayer', (player) => {
 
 socket.on('playerDisconnected', (id) => delete players[id]);
 
-socket.on('playerMoved', (data) => {  
-  if (!players[data.id]) return;
-    players[data.id].targetX = data.x;
-    players[data.id].targetY = data.y;
-  
+socket.on("stateUpdate", (serverPlayers) => {
+  players = serverPlayers;
 });
 
 
