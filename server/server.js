@@ -58,10 +58,10 @@ io.on('connection', (socket) => {
 
 const TICK = 1000 / 60;   
 
-function updataGame(){
+function updateGame(){
     const radius = 10;
     const diameter = radius * 2;
-    
+
     // Update all players
     for (const id in players){
         const p = players[id];
