@@ -70,13 +70,13 @@ socket.on("stateUpdate", snapshot => {
   }
   
     // Remove missing
-    for (const id in renderPlayers){
-      if (!snapshot[id]) delete renderPlayers[id];
+    for (const rid in renderPlayers){
+      if (!snapshot[rid]) delete renderPlayers[rid];
     }
   });
 
 let lastDx = 0, lastDy = 0;
-const SPEED = 300; // px per second (same as server)
+const SPEED = 3; // px per second (same as server)
 
 function sendInput(dx, dy){
   socket.emit("playerMovement", { dx, dy});
