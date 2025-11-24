@@ -40,8 +40,8 @@ io.on('connection', (socket) => {
       if (!p) return;
 
       // Sanitize input
-      p.dx = typeof input.dx === 'number' ? input.dx : 0;
-      p.dy = typeof input.dy === 'number' ? input.dy : 0;
+      p.dx = input.dx || 0;
+      p.dy = input.dy || 0;
   });
 
   // Remove player

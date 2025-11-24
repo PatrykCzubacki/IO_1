@@ -9,6 +9,8 @@ canvas.height = window.innerHeight;
 const keys = {};
 let players = {}; // state from server (authoritative values)
 let renderPlayers = {}; // local rendered positions and smoothing info
+let inputSeq = 0;
+let pendingInputs = [];
 
 document.addEventListener('keydown', (e) => keys[e.key] = true);
 document.addEventListener('keyup', (e) => keys[e.key] = false);
