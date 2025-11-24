@@ -57,7 +57,7 @@ io.on('connection', (socket) => {
 // ===========================
 
 const TICK_RATE = 60; // tick per second
-const FRAME_RATE = 1000 / TICK_RATE;   
+const FRAME_TIME = 1000 / TICK_RATE;   
 const RADIUS = 10;
 const DIAMETER = RADIUS * 2;
 const WORLD = { w: 1200, h: 800}; //bounds
