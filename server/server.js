@@ -35,11 +35,13 @@ io.on('connection', (socket) => {
   // Send new player to everyone else
   socket.broadcast.emit('newPlayer', players[socket.id] );
 
-  // Receive movement input
-  socket.on('playerMovement', (input) => {
-      if (!players[socket.id]) return;
-      players[socket.id].dx = input.dx;
-      players[socket.id].dy = input.dy;
+  socket.on("playerInput", data => {
+      const p = players[socket.id];
+      if (!p) return;
+
+      // Store input only
+      p.dx = data.dx;
+      p.dy = data.dy;
   });
 
   // Remove player
@@ -51,19 +53,19 @@ io.on('connection', (socket) => {
 });
 
 // ===========================
-//      SERVER TICK LOOP
+//      GAME LOOP (60 FPS SERVER)
 // ===========================
 
-const TICK_RATE = 30;   // 30 ticks/sec
-const FRAME_TIME = 1000 / TICK_RATE;
+const TICK = 1000 / 60;   
 
-setInterval(() => {
+function updataGame(){
     const radius = 10;
     const diameter = radius * 2;
-
+    
     // Update all players
     for (const id in players){
         const p = players[id];
+        if (!p) continue;
 
         const oldX = p.x;
         const oldY = p.y;
@@ -83,34 +85,19 @@ setInterval(() => {
 
             const dist = Math.sqrt(dx*dx + dy*dy);
 
-            if (dist < diameter && dist > 0) {
-
-              // Distance they overlap
-              const overlap = diameter - dist;
-
-              // Normalize push direction
-              const nx = dx / dist;
-              const ny = dy / dist;
-
-              // Push each player by half of overlap
-              const push = overlap / 2;
-
-              p.x += nx * push;
-              p.y += ny * push;
-
-              o.x -= nx * push;
-              o.y -= ny * push;
+            if (dist < diameter){
+                // Revert
+                p.x = oldX;
+                p.y = oldY;
+                break;
             }
-        }
-
-        // World bounds
-        p.x = Math.max(radius, Math.min(800 - radius, p.x));
-        p.y = Math.max(radius, Math.min(800 - radius, p.y));
+      }
     }
-        // Send updated state to all clients;
-        io.emit("stateUpdate", players);
-    }, FRAME_RATE);
+    io.emit("stateUpdate", players);
+  }
 
+setInterval(updateGame, TICK);
+    
 server.listen(PORT, () => {
   //console.log('Server running on http://localhost:3000');
 });

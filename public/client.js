@@ -12,27 +12,21 @@ document.addEventListener('keydown', (e) => keys[e.key] = true);
 document.addEventListener('keyup', (e) => keys[e.key] = false);
 
 
-socket.on('currentPlayers', (serverPlayers) => players = serverPlayers);
+socket.on('currentPlayers', data => {
+  players = data;
+});
 
 socket.on('newPlayer', (player) => {
   players[player.id] = player;
 });
 
-socket.on('playerDisconnected', (id) => delete players[id]);
+socket.on('playerDisconnected', id => delete players[id]);
 
-socket.on("stateUpdate", (serverPlayers) => {
+socket.on("stateUpdate", serverPlayers => {
   players = serverPlayers;
 });
 
-
-let lastMove = 0;
-const MOVE_INTERVAL = 50; // ms = 20 updates/sec
-
-function update(){
-
-  const player = players[socket.id];
-  if(!player) return
-
+function sendInput(){
   //movement direction
   let dx = 0;
   let dy = 0;
@@ -42,13 +36,7 @@ function update(){
   if (keys['ArrowLeft']) dx = -1;
   if (keys['ArrowRight']) dx = 1;
 
-  const now = Date.now();
-  if (now - lastMove > MOVE_INTERVAL)
-  {
-    //send player position to server
-    socket.emit('playerMovement', { dx, dy});
-    lastMove = now;
-  }
+  socket.emit('playerInput', { dx, dy});
 }
 
 function draw() {
@@ -56,15 +44,6 @@ function draw() {
 
   for (const id in players) {
     const p = players[id];
-    if (!p.targetX){
-      p.targetX = p.x;
-      p.targetY = p.y;
-    }
-
-    // Interpolate 0.2 = smoothing factor
-    p.x += (p.targetX - p.x) * 0.2;
-    p.y += (p.targetY - p.y) * 0.2;
-
     ctx.fillStyle = p.color;
     ctx.beginPath();
     ctx.arc(p.x, p.y, 10, 0, Math.PI * 2);
@@ -72,8 +51,9 @@ function draw() {
   }
 }
 
+
 function gameLoop(){
-  update();
+  sendInput();
   draw();
   requestAnimationFrame(gameLoop);
 }
