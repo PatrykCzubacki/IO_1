@@ -7,7 +7,6 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 const keys = {};
-let players = {}; // state from server (authoritative values)
 let renderPlayers = {}; // local rendered positions and smoothing info
 
 document.addEventListener('keydown', (e) => keys[e.key] = true);
@@ -25,6 +24,8 @@ function ensureRender(id, serverObj){
       isLocal: id === socket.id
     };
   } else {
+    renderPlayers[id].serverX = serverObj.x;
+    renderPlayers[id].serverY = serverObj.y;
     // Update color if changed
     renderPlayers[id].color = serverObj.color;
   }
@@ -46,7 +47,6 @@ socket.on('newPlayer', (player) => {
 });
 
 socket.on('playerDisconnected', id => {
-  delete players[id];
   delete renderPlayers[id];
 });
 
@@ -56,40 +56,26 @@ socket.on('playerDisconnected', id => {
 
 // Authoritateive snapshot from server
 socket.on("stateUpdate", snapshot => {
-  // Replace authoritative server state
-  players = snapshot;
 
   // Update render target positions
   for (const id in snapshot){
     const s = snapshot[id];
     ensureRender(id, s);
-
-    // Store server authoritative coordinates for smooth reconciliation
-    renderPlayers[id].serverX = s.x;
-    renderPlayers[id].serverY = s.y;
-  }
-  
-    // Remove missing
-    for (const rid in renderPlayers){
-      if (!snapshot[rid]) delete renderPlayers[rid];
-    }
   });
 
-let lastDx = 0, lastDy = 0;
-const SPEED = 300; // px per second (same as server)
+   // =====================
+// INPUT SENDING LOOP
+// =====================
+setInterval(() => {
+  let dx = 0, dy = 0;
+  if (keys['ArrowUp']) dy = -1;
+  if (keys['ArrowDown']) dy = 1;
+  if (keys['ArrowLeft']) dx = -1;
+  if (keys['ArrowRight']) dx = 1;
+  if (dx !== 0 && dy !== 0){ const inv = 1/Math.sqrt(2); dx *= inv; dy *= inv; }
+  socket.emit('playerMovement', { dx, dy });
+}, 1000/60); // send 60 times per second
 
-function sendInput(dx, dy){
-  socket.emit("playerMovement", { dx, dy});
-}
-
-// ======================
-// PREDICTION
-// ======================
-
-// Input sending & local prediction
-function predict(dt){
-  
-}
 
 // ===================
 // DRAW LOOP
@@ -101,7 +87,6 @@ function draw() {
 
   // Smoothing factor for remote players and reconciliation on local
   const SMOOTH = 0.2; // [0..1] higher = faster snap
-  const RECONCILE = 0.1;
 
   for (const id in renderPlayers) {
     const r = renderPlayers[id];
@@ -117,25 +102,9 @@ function draw() {
     ctx.arc(r.x, r.y, 10, 0, Math.PI * 2);
     ctx.fill();
   }
+  requestAnimationFrame(draw);
 }
-
-
-// ========================
-// MAIN LOOP
-// ========================
-
-let lastTime = performance.now();
-
-function loop(t){
-  const dt = (t - lastTime) / 1000; // seconds
-  lastTime = t;
-
-  predict(dt);
-  draw();
-  requestAnimationFrame(loop);
-}
-
-requestAnimationFrame(loop);
+draw();
 
 // Handle window resize
 window.addEventListener('resize',() => {
