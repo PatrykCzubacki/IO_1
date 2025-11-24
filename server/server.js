@@ -26,7 +26,7 @@ io.on('connection', (socket) => {
       dx: 0,
       dy: 0, 
       color: '#' + ((1<<24)*Math.random() | 0).toString(16), 
-      speed: 5
+      speed: 3 // Keep server speed LOW to acoid divergence
     };
 
   // Send all players to new client
@@ -40,8 +40,8 @@ io.on('connection', (socket) => {
       if (!p) return;
 
       // Sanitize input
-      p.dx = input.dx || 0;
-      p.dy = input.dy || 0;
+      p.dx = typeof input.dx === "number" ? input.dx : 0;
+      p.dy = typeof input.dy === "number" ? input.dy : 0;
   });
 
   // Remove player
@@ -90,7 +90,8 @@ setInterval(() => {
 
 
       const dist = Math.sqrt(distSq);
-      if (dist < DIAMETER){
+      if (dist < DIAMETER * DIAMETER){
+        const dist = Math.srqr(distSq) || 0.01;
         const overlap = DIAMETER - dist;
         const nx = dx / dist;
         const ny = dy / dist;
