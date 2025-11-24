@@ -159,7 +159,7 @@ function draw() {
 
 let lastTime = performance.now();
 
-function loop(){
+function loop(t){
   const dt = (t - lastTime) / 1000; // seconds
   lastTime = t;
 
