@@ -33,8 +33,6 @@ function ensureRender(id, serverObj){
 
 // Initial & new players
 socket.on('currentPlayers', serverPlayers => {
-  players = serverPlayers;
-
   // Create render copies
   for (const id in serverPlayers){
     ensureRender(id, serverPlayers[id]);
@@ -42,7 +40,6 @@ socket.on('currentPlayers', serverPlayers => {
 });
 
 socket.on('newPlayer', (player) => {
-  players[player.id] = player;
   ensureRender(player.id,player);
 });
 
@@ -61,6 +58,7 @@ socket.on("stateUpdate", snapshot => {
   for (const id in snapshot){
     const s = snapshot[id];
     ensureRender(id, s);
+  }
   });
 
    // =====================
