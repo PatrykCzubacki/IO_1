@@ -88,34 +88,7 @@ function sendInput(dx, dy){
 
 // Input sending & local prediction
 function predict(dt){
-  const player = renderPlayers[socket.id];
-  if(!player) return;
-
-  // Movement direction
-  let dx = 0;
-  let dy = 0;
-
-  if (keys['ArrowUp']) dy = -1;
-  if (keys['ArrowDown']) dy = 1;
-  if (keys['ArrowLeft']) dx = -1;
-  if (keys['ArrowRight']) dx = 1;
-
-  // Normalize diagonal
-  if (dx !== 0 && dy !== 0){
-    const inv = 1 / Math.sqrt(2);
-    dx *= inv;
-    dy *= inv;
-  }
-
-  if (dx !== lastDx || dy !== lastDy){
-    sendInput(dx,dy);
-    lastDx = dx;
-    lastDy = dy;
-  }
-
-  // Local prediction
-  player.x += dx * SPEED * dt;
-  player.y += dy * SPEED * dt;
+  
 }
 
 // ===================
@@ -133,16 +106,10 @@ function draw() {
   for (const id in renderPlayers) {
     const r = renderPlayers[id];
 
-    if (r.isLocal){
-      // Reconcile
-      const dx = r.serverX - r.x;
-      const dy = r.serverY - r.y;
-      r.x += dx * RECONCILE;
-      r.y += dy * RECONCILE;
-    } else{
-      r.x += (r.serverX - r.x) * SMOOTH;
-      r.y += (r.serverY - r.y) * SMOOTH;
-    }
+    // Smoothly move to server position for all players
+    r.x += (r.serverX - r.x) * SMOOTH;
+    r.y += (r.serverY - r.y) * SMOOTH;
+    
     
     // Draw
     ctx.fillStyle = r.color;
