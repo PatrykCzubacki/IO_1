@@ -1,4 +1,5 @@
 const socket = io();
+
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
 
@@ -6,27 +7,75 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 const keys = {};
-let players = {};
+let players = {}; // state from server (authoritative values)
+let renderPlayers = {}; // local rendered positions and smoothing info
 
 document.addEventListener('keydown', (e) => keys[e.key] = true);
 document.addEventListener('keyup', (e) => keys[e.key] = false);
 
+// Helper to ensure render state entry
+function ensureRender(id, serverObj){
+  if (!renderPlayers[id]){
+    renderPlayers[id] = {
+      x: serverObj.x,
+      y: serverObj.y,
+      color: serverObj.color || '#888',
+      serverX: serverObj.x,
+      serverY: serverObj.y,
+      isLocal: id === socket.id,
+    };
+  } else {
+    // Update color if changed
+    renderPlayers[id].color = serverObj.color || renderPlayers[id].color;
+  }
+}
 
-socket.on('currentPlayers', data => {
-  players = data;
+// Initial & new players
+socket.on('currentPlayers', serverPlayers => {
+  players = serverPlayers;
+
+  // Create render copies
+  for (const id in serverPlayers){
+    ensureRender(id, serverPlayers[id]);
+  }
 });
 
 socket.on('newPlayer', (player) => {
   players[player.id] = player;
+  ensureRender(player.id,player);
 });
 
-socket.on('playerDisconnected', id => delete players[id]);
-
-socket.on("stateUpdate", serverPlayers => {
-  players = serverPlayers;
+socket.on('playerDisconnected', id => {
+  delete players[id];
+  deleterrenderPlayers[id];
 });
 
-function sendInput(){
+// Authoritateive snapshot from server
+socket.on("stateUpdate", snapshot => {
+  // Replace authoritative server state
+  players = snapshot;
+
+  // Update render target positions
+  for (const id in snapshot){
+    const s = snapshot[id];
+    ensureRender(id, s);
+
+    // Store server authoritative coordinates for smooth reconciliation
+    renderPlayers[id].serverX = s.x;
+    renderPlayers[id].serverY = s.y;
+  }
+
+  // Remove any render players that disappeared
+  for (const id in renderPlayers){
+    if (!snapshot[id]) delete renderPlayers[id];
+  }
+});
+
+// Input sending & local prediction
+function sendInputAndPredict(){
+  const player = renderPlayers[socket.id];
+  if(!player) return;
+
   //movement direction
   let dx = 0;
   let dy = 0;
@@ -36,26 +85,61 @@ function sendInput(){
   if (keys['ArrowLeft']) dx = -1;
   if (keys['ArrowRight']) dx = 1;
 
-  socket.emit('playerInput', { dx, dy});
+  // Send input every frame (tiny packets)
+  socket.emit('playerMovement', { dx, dy});
+
+  // Local immediate prediction (very small step, predictable)
+  // NOTE: server speed is 3 per tick; we approximate using per-frame factor
+  const LOCAL_PREDICT_SPEED = 3; // Should match server speed roughly
+  player.x += dx * LOCAL_PREDICT_SPEED;
+  player.y += dy * LOCAL_PREFICT_SPEED;
 }
 
+// Drawing & smoothing
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  for (const id in players) {
-    const p = players[id];
-    ctx.fillStyle = p.color;
+  // Smoothing factor for remote players and reconciliation on local
+  const SMOOTH = 0.2; // [0..1] higher = faster snap
+
+  for (const id in renderPlayers) {
+    const r = renderPlayers[id];
+
+    // If this is not local player, smoothly interpolate toward server
+    if (id != socket.id){
+      // Move rendered towards server authoritative position
+      r.x += (r.serverX - r.x) * SMOOTH;
+      r.y += (r.serverY - r.y) * SMOOTH;
+    } else {
+      // Local player: reconciliation -- if server is far away, move a bit toward it
+      const dx = r.serverX - r.x;
+      const dy = r.serverY - r.y;
+      const distSq = dx*dx + dy*dy;
+      const threshold = 400; // If very large difference, snap faster
+      const factor = distSq > threshold ? 0.5 : SMOOTH;
+      r.x += dx * factor;
+      r.y += dy * factor;
+    }
+
+    // Draw
+    ctx.fillStyle = r.color;
     ctx.beginPath();
-    ctx.arc(p.x, p.y, 10, 0, Math.PI * 2);
+    ctx.arc(r.x, r.y, 10, 0, Math.PI * 2);
     ctx.fill();
   }
 }
 
-
-function gameLoop(){
-  sendInput();
+// Main loop
+function loop(){
+  sendInputAndPredict();
   draw();
-  requestAnimationFrame(gameLoop);
+  requestAnimationFrame(loop);
 }
 
-gameLoop();
+requestAnimationFrame(loop);
+
+// Handle window resize
+window.addEventListener('resize',() => {
+  canvas.width = window.innerWidth;
+  canvas.height = windows.innerHeight;
+});

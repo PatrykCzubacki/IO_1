@@ -35,13 +35,13 @@ io.on('connection', (socket) => {
   // Send new player to everyone else
   socket.broadcast.emit('newPlayer', players[socket.id] );
 
-  socket.on("playerInput", data => {
+  socket.on("playerMovement", (input) => {
       const p = players[socket.id];
       if (!p) return;
 
-      // Store input only
-      p.dx = data.dx;
-      p.dy = data.dy;
+      // Sanitize input
+      p.dx = typeof input.dx === 'number' ? input.dx : 0;
+      p.dy = typeof input.dy === 'nu,ber' ? input.dy : 0;
   });
 
   // Remove player
@@ -56,48 +56,83 @@ io.on('connection', (socket) => {
 //      GAME LOOP (60 FPS SERVER)
 // ===========================
 
-const TICK = 1000 / 60;   
+const TICK_RATE = 60; // tick per second
+const FRAME_RATE = 1000 / TICK_RATE;   
+const RADIUS = 10;
+const DIAMETER = RADIUS * 2;
+const WORLD = { w: 1200, h: 800}; //bounds
 
-function updateGame(){
-    const radius = 10;
-    const diameter = radius * 2;
+setInterval(() => {
+  // Move each player according to last known input
+  for (const id in players){
+    const p = players[id];
 
-    // Update all players
-    for (const id in players){
-        const p = players[id];
-        if (!p) continue;
+    // Apply input-driven movement
+    p.x += p.dx * p.speed;
+    p.y += p.dy * p.speed;
 
-        const oldX = p.x;
-        const oldY = p.y;
-
-        // Apply movement;
-        p.x += p.dx * p.speed;
-        p.y += p.dy * p.speed;
-
-        // Check collision with other players
-        for(const otherId in players){
-            if (otherId == id) continue;
-
-            const o = players[otherId];
-
-            const dx = p.x - o.x;
-            const dy = p.y - o.y;
-
-            const dist = Math.sqrt(dx*dx + dy*dy);
-
-            if (dist < diameter){
-                // Revert
-                p.x = oldX;
-                p.y = oldY;
-                break;
-            }
-      }
-    }
-    io.emit("stateUpdate", players);
+    // World bounds
+    p.x = Math.max(RADIUS, Math.min(WORLD.w - RADIUS, p.x));
+    p.y = Math.max(RADIUS, Math.min(WORLD.h - RADIUS, p.y));
   }
 
-setInterval(updateGame, TICK);
-    
+  // Collision resolution (simple pairwise separation)
+  // Move overlkapping pairs apart by half overlap each
+  const ids = Object.keys(players);
+  for(let i=0; i < ids.length; i++){
+    for (let j = i + 1; j < ids.length; j++){
+      const a = players[ids[i]];
+      const b = players[ids[j]];
+
+      const dx = a.x - b.x;
+      const dy = a.y - b.y;
+      const distSq = dx * dx + dy * dy;
+
+      if (distSq === 0){
+        // Exact overlap - nudge randomly
+        const nudgex = (Math.random() - 0.5) * 0.1;
+        const nudgey = (Math.random() - 0.5) * 0.1;
+        a.x += nudgex;
+        a.y += nudgey;
+        b.x -= nudgex;
+        b.y -= nudgey;
+        continue;
+      }
+
+      const dist = Math.sqrt(distSq);
+      if (dist < DIAMETER){
+        const overlap = DIAMETER - dist;
+        const nx = dx / dist;
+        const ny = dy / dist;
+        const push = overlap / 2;
+
+        // Separate equally 
+        a.x += nx * push;
+        a.y += ny * push;
+        b.x -= nx * push;
+        b.y -= ny * push;
+
+        // Clamp after push
+        a.x = Math.max(RADIUS, Math.min(WORLD.w - RADIUS, a.x));
+        a.y = Math.max(RADIUS, Math.min(WORLD.h - RADIUS, a.y));
+        b.x = Math.max(RADIUS, Math.min(WORLD.w - RADIUS, b.x));
+        b.y = Math.max(RADIUS, Math.min(WORLD.h - RADIUS, b.y));
+      }
+    }
+  }
+
+  // Broadvast authoritative state to all clients once per tick
+  // We send only minimal fields to reduce bandwidth
+  const snapshot = {};
+  for (const id in players){
+    const p = players[id];
+    snapshot[id] = { id: p.id, x: p.x, y: p.y, color: p.color};
+  }
+
+  io.emit("stateUpdate", snapshot);
+}, FRAME_TIME);
+
+
 server.listen(PORT, () => {
-  //console.log('Server running on http://localhost:3000');
+  console.log('Server running on port ', PORT);
 });
