@@ -48,7 +48,7 @@ function drawMap(){
 
         ctx.drawImage(
           tileset,
-          sx, sy, TILE_SIZE, TILESIZE,
+          sx, sy, TILE_SIZE, TILE_SIZE,
           x * TILE_SIZE, y * TILE_SIZE,
           TILE_SIZE, TILE_SIZE
         );
