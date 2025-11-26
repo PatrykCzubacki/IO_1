@@ -20,7 +20,7 @@ app.use(express.static(path.join(__dirname, "..", "public")));
 let collisionMap = [];
 const TILE_SIZE = 32; // Same as Tiled tileset
 
-const csvTest = fs.readFileSync(path.join(__dirname, '..', 'public', 'collision.csv'), 'utf8')
+const csvTest = fs.readFileSync(path.join(__dirname, '..', 'public', 'collision1.csv'), 'utf8')
 collisionMap = csvTest.trim().split('\n').map(r => r.split(',').map(Number));
 const MAP_WIDTH = collisionMap[0].length * TILE_SIZE;
 const MAP_HEIGHT = collisionMap.length * TILE_SIZE;
@@ -36,7 +36,7 @@ function getRandomSpawn(){
   do {
     tx = Math.floor(Math.random() * collisionMap[0].length);
     ty = Math.floor(Math.random() * collisionMap.length);
-  } while (collisionMap[ty][tx] !== 0);
+  } while (collisionMap[ty][tx] === 0); // Only spawn on walkable tiles (-1)
 
   return {
     x: tx * TILE_SIZE + TILE_SIZE / 2,
