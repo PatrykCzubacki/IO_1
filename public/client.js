@@ -48,7 +48,7 @@ function getMapOffset(){
   if (!collisionMap.length) return { x: 0, y: 0};
   const mapWidth = collisionMap[0].length * TILE_SIZE;
   const mapHeight = collisionMap.length * TILE_SIZE;
-  return { x: (canvas.width = mapWidth) / 2, y: (canvas.height - mapHeight) / 2};
+  return { x: (canvas.width - mapWidth) / 2, y: (canvas.height - mapHeight) / 2};
 }
 
 // =================
