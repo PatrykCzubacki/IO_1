@@ -24,7 +24,7 @@ fetch('collision.csv')
 
 // Load tileset PNG
 const tileset = new Image();
-tilset.src = 'map.png';
+tileset.src = 'map.png';
 
 
 document.addEventListener('keydown', (e) => keys[e.key] = true);
@@ -47,7 +47,7 @@ function drawMap(){
         const sy = Math.floor((tileId -1 ) / tilesPerRow) * TILE_SIZE;
 
         ctx.drawImage(
-          tilest,
+          tileset,
           sx, sy, TILE_SIZE, TILESIZE,
           x * TILE_SIZE, y * TILE_SIZE,
           TILE_SIZE, TILE_SIZE
