@@ -106,7 +106,7 @@ setInterval(() => {
 // Drawing & smoothing
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  const offset = getMapOffset();
+  const offset = getMapOffset(); // Map is centered
 
   // Draw collision map (optional, debug)
   if (collisionMap.length){
@@ -134,7 +134,7 @@ function draw() {
     // Draw
     ctx.fillStyle = r.color;
     ctx.beginPath();
-    ctx.arc(r.x, r.y, 10, 0, Math.PI * 2);
+    ctx.arc(r.x + offset.x, r.y + offset.y, 10, 0, Math.PI * 2);
     ctx.fill();
   }
   requestAnimationFrame(draw);
