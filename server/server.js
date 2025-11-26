@@ -106,12 +106,27 @@ setInterval(() => {
 
     // Collision with map
     function colliding(x, y){
-      const tx = Math.floor(x / TILE_SIZE);
-      const ty = Math.floor(y / TILE_SIZE);
-      if (ty < 0 || ty >= collisionMap.length || tx < 0 || tx >= collisionMap[0].length) return true;
-      return collisionMap[ty][tx] === 0; // 0 = wall
-    }
+      const RARIUS = 10; // same as your player radius
+      const left = x - RADIUS;
+      const right = x + RADIUS;
+      const top = y - RADIUS;
+      const bottom = y + RADIUS;
 
+      // Tiles covered by the player's bounding box
+      const tx1 = Math.floor(left / TILE_SIZE);
+      const tx2 = Math.floor(right / TILE_SIZE);
+      const ty1 = Math.floor(top / TILE_SIZE);
+      const ty2 = Math.floor(bottom / TILE_SIZE);
+
+      // Check all four corners
+      for (let ty = ty1; ty <= ty2; ty++){
+        for (let tx = tx1; tx <= tx2; tx++){
+          if (ty < 0 || ty >= collisionMap.length || tx < 0 || tx >= collisionMap[0].length) {
+            return true; // outside map = collision
+          }
+      return collisionMap[ty][tx] !== 0; // 0 = wall
+        }
+        }
     if (!colliding(newX, p.y)) p.x = newX;
     if (!colliding(p.x, newY)) p.y = newY;
   }
