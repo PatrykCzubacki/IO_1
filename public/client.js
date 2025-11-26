@@ -11,10 +11,6 @@ let renderPlayers = {}; // local rendered positions and smoothing info
 let collisionMap = [];
 let TILE_SIZE = 32;
 
-
-document.addEventListener('keydown', (e) => keys[e.key] = true);
-document.addEventListener('keyup', (e) => keys[e.key] = false);
-
 // =================
 // Load collision map (same CSV)
 // =================
@@ -25,7 +21,45 @@ fetch('collision.csv')
     collisionMap = text.trim().split('\n').map(r => r.split(',').map(Number));
   });
 
-// Helper to ensure render state entry
+
+// Load tileset PNG
+const tileset = new Image();
+tilset.src = 'map.png';
+
+
+document.addEventListener('keydown', (e) => keys[e.key] = true);
+document.addEventListener('keyup', (e) => keys[e.key] = false);
+
+// ====================
+// Rysowanie mapy
+// ====================
+function drawMap(){
+  if (!collisionMap.length) return;
+
+  const tilesPerRow = tileset.width / TILE_SIZE;
+
+   for (let y = 0; y < collisionMap.length; y++){
+      for (let x = 0; x < collisionMap[0].length; x++){
+        const tileId = collisionMap[y][x];
+        if (tileId === 0) continue; // 0 = puste
+
+        const sx = ((tileId - 1) % tilesPerRow) * TILE_SIZE;
+        const sy = Math.floor((tileId -1 ) / tilesPerRow) * TILE_SIZE;
+
+        ctx.drawImage(
+          tilest,
+          sx, sy, TILE_SIZE, TILESIZE,
+          x * TILE_SIZE, y * TILE_SIZE,
+          TILE_SIZE, TILE_SIZE
+        );
+      }
+    }
+}
+
+// ===========================
+// Render players
+// ===========================
+
 function ensureRender(id, serverObj){
   if (!renderPlayers[id]){
     renderPlayers[id] = {
@@ -42,13 +76,6 @@ function ensureRender(id, serverObj){
     // Update color if changed
     renderPlayers[id].color = serverObj.color;
   }
-}
-
-function getMapOffset(){
-  if (!collisionMap.length) return { x: 0, y: 0};
-  const mapWidth = collisionMap[0].length * TILE_SIZE;
-  const mapHeight = collisionMap.length * TILE_SIZE;
-  return { x: (canvas.width - mapWidth) / 2, y: (canvas.height - mapHeight) / 2};
 }
 
 // =================
@@ -106,19 +133,7 @@ setInterval(() => {
 // Drawing & smoothing
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  const offset = getMapOffset(); // Map is centered
-
-  // Draw collision map (optional, debug)
-  if (collisionMap.length){
-    ctx.fillStyle = 'rgba(200,0,0,0.3)';
-    for (let y = 0; y < collisionMap.length; y++){
-      for (let x = 0; x < collisionMap[0].length; x++){
-        if (collisionMap[y][x] !== 0){
-          ctx.fillRect(offset.x + x * TILE_SIZE, offset.y + y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
-        }
-      }
-    }
-  }
+  drawMap();
 
   // Smoothing factor for remote players and reconciliation on local
   const SMOOTH = 0.2; // [0..1] higher = faster snap
@@ -134,7 +149,7 @@ function draw() {
     // Draw
     ctx.fillStyle = r.color;
     ctx.beginPath();
-    ctx.arc(r.x + offset.x, r.y + offset.y, 10, 0, Math.PI * 2);
+    ctx.arc(r.x, r.y, 10, 0, Math.PI * 2);
     ctx.fill();
   }
   requestAnimationFrame(draw);
