@@ -40,15 +40,18 @@ document.addEventListener('keyup', (e) => keys[e.key] = false);
 function drawMap(){
   if (!collisionMap.length || !tilesetLoaded) return;
 
-  const tilesPerRow = tileset.width / TILE_SIZE;
+  const tilesPerRow = Math.floor(tileset.width / TILE_SIZE);
 
    for (let y = 0; y < collisionMap.length; y++){
       for (let x = 0; x < collisionMap[0].length; x++){
         const tileId = collisionMap[y][x];
         if (tileId === -1) continue; // walkable, no tile
 
-        const sx = ((tileId - 1) % tilesPerRow) * TILE_SIZE;
-        const sy = Math.floor((tileId -1 ) / tilesPerRow) * TILE_SIZE;
+        // tileId 0 = first tile in tileset (top-left)
+        const tileIndex = tileId;
+
+        const sx = (tileIndex % tilesPerRow) * TILE_SIZE;
+        const sy = Math.floor(tileIndex / tilesPerRow) * TILE_SIZE;
 
         ctx.drawImage(
           tileset,
