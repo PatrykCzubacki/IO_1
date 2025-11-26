@@ -36,7 +36,7 @@ function getRandomSpawn(){
   do {
     tx = Math.floor(Math.random() * collisionMap[0].length);
     ty = Math.floor(Math.random() * collisionMap.length);
-  } while (collisionMap[ty][tx] === 0); // Only spawn on walkable tiles (-1)
+  } while (collisionMap[ty][tx] !== -1); // Only spawn on walkable tiles (-1)
 
   return {
     x: tx * TILE_SIZE + TILE_SIZE / 2,
@@ -109,7 +109,7 @@ setInterval(() => {
       const tx = Math.floor(x / TILE_SIZE);
       const ty = Math.floor(y / TILE_SIZE);
       if (ty < 0 || ty >= collisionMap.length || tx < 0 || tx >= collisionMap[0].length) return true;
-      return collisionMap[ty][tx] !== 0;
+      return collisionMap[ty][tx] === 0; // 0 = wall
     }
 
     if (!colliding(newX, p.y)) p.x = newX;

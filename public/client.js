@@ -15,7 +15,7 @@ let TILE_SIZE = 32;
 // Load collision map (same CSV)
 // =================
 
-fetch('collision.csv')
+fetch('collision1.csv')
   .then(res => res.text())
   .then(text => {
     collisionMap = text.trim().split('\n').map(r => r.split(',').map(Number));
@@ -45,7 +45,7 @@ function drawMap(){
    for (let y = 0; y < collisionMap.length; y++){
       for (let x = 0; x < collisionMap[0].length; x++){
         const tileId = collisionMap[y][x];
-        if (tileId === 0) continue; // 0 = puste
+        if (tileId === -1) continue; // walkable, no tile
 
         const sx = ((tileId - 1) % tilesPerRow) * TILE_SIZE;
         const sy = Math.floor((tileId -1 ) / tilesPerRow) * TILE_SIZE;
