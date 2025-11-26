@@ -3,6 +3,7 @@ const express = require('express');
 const path = require("path");
 const http = require('http');
 const { Server } = require('socket.io');
+const fs = require('fs');
 
 const app = express();
 const server = http.createServer(app);
@@ -13,16 +14,50 @@ const PORT = process.env.PORT || 3000
 console.log("Static folder:", __dirname + '/public');
 app.use(express.static(path.join(__dirname, "..", "public")));
 
+// =======================
+// Load collision map CSV
+// =======================
+let collisionMap = [];
+const TILE_SIZE = 32; // Same as Tiled tileset
+
+const csvTest = fs.readFileSync(path.join(__dirname, '..', 'public', 'collision.csv'), 'utf8')
+collisionMap = csvTest.trim().split('\n').map(r => r.split(',').map(Number));
+const MAP_WIDTH = collisionMap[0].length * TILE_SIZE;
+const MAP_HEIGHT = collisionMap.length * TILE_SIZE;
+
+// =====================
+// Players
+// =====================
+
 const players = {};
+
+function getRandomSpawn(){
+  let tx, ty;
+  do {
+    tx = Math.floor(Math.random() * collisionMap[0].length);
+    ty = Math.floor(Math.random() * collisionMap.length);
+  } while (collisionMap[ty][tx] !== 0);
+
+  return {
+    x: tx * TILE_SIZE + TILE_SIZE / 2;
+    y: ty * TILE_SIZE + TILE_SIZE / 2;
+  };
+}
+
+// ================
+// Socket.io
+// ================
 
 io.on('connection', (socket) => {
   console.log('Player connected:', socket.id);
 
+  const spawn = getRandomSpawn();
+
   // Create player
   players[socket.id] = {
       id: socket.id, 
-      x: Math.random() * 800, 
-      y: Math.random() * 600,
+      x: spawn.x, 
+      y: spawn.y,
       dx: 0,
       dy: 0, 
       color: '#' + ((1<<24)*Math.random() | 0).toString(16), 
@@ -67,15 +102,21 @@ setInterval(() => {
   // Move each player according to last known input
   for (const id in players){
     const p = players[id];
+    let newX = p.x + p.dx * p.speed * dt;
+    let newY = p.y + p.dy * p.speed * dt;
 
-    // Apply input-driven movement
-    p.x += p.dx * p.speed * dt;
-    p.y += p.dy * p.speed * dt;
+    // Collision with map
+    function colliding(x, y){
+      const tx = Math.floor(x / TILE_SIZE);
+      const ty = Math.floor(y / TILE_SIZE);
+      if (ty < 0 || ty >= collisionMap.length || tx < 0 || tx >= collisionMap[0].length) return true;
+      return collisionMap[ty][tx] !== 0;
+    }
 
-    // World bounds
-    p.x = Math.max(RADIUS, Math.min(WORLD.w - RADIUS, p.x));
-    p.y = Math.max(RADIUS, Math.min(WORLD.h - RADIUS, p.y));
+    if (!colliding(newX, p.y)) p.x = newX;
+    if (!colliding(p.x, newY)) p.y = newY;
   }
+
 
   // Collision resolution (simple pairwise separation)
   // Move overlkapping pairs apart by half overlap each

@@ -8,9 +8,22 @@ canvas.height = window.innerHeight;
 
 const keys = {};
 let renderPlayers = {}; // local rendered positions and smoothing info
+let collisionMap = [];
+let TILE_SIZE = 32;
+
 
 document.addEventListener('keydown', (e) => keys[e.key] = true);
 document.addEventListener('keyup', (e) => keys[e.key] = false);
+
+// =================
+// Load collision map (same CSV)
+// =================
+
+fetch('collision.csv')
+  .then(res => res.text())
+  .then(text => {
+    collisionMap = text.trim().split('\n').map(r => r.split(',').map(Number));
+  });
 
 // Helper to ensure render state entry
 function ensureRender(id, serverObj){
@@ -31,6 +44,17 @@ function ensureRender(id, serverObj){
   }
 }
 
+function getMapOffset(){
+  if (!collisionMap.length) return { x: 0, y: 0};
+  const mapWidth = collisionMap[0].length * TILE_SIZE;
+  const mapHeight = collisionMap.length * TILE_SIZE;
+  return { x: (canvas.width = mapWidth) / 2, y: (canvas.height - mapHeight) / 2};
+}
+
+// =================
+// Socket events
+// =================
+
 // Initial & new players
 socket.on('currentPlayers', serverPlayers => {
   // Create render copies
@@ -39,13 +63,8 @@ socket.on('currentPlayers', serverPlayers => {
   }
 });
 
-socket.on('newPlayer', (player) => {
-  ensureRender(player.id,player);
-});
-
-socket.on('playerDisconnected', id => {
-  delete renderPlayers[id];
-});
+socket.on('newPlayer', player => ensureRender(player.id,player));
+socket.on('playerDisconnected', id => delete renderPlayers[id]);
 
 // ===================
 //  SERVER UPDATE
@@ -87,6 +106,19 @@ setInterval(() => {
 // Drawing & smoothing
 function draw() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  const offset = getMapOffset();
+
+  // Draw collision map (optional, debug)
+  if (collisionMap.length){
+    ctx.fillStyle = 'rgba(200,0,0,0.3)';
+    for (let y = 0; y < collisionMap.length; y++){
+      for (let x = 0; x < collisionMap[0].length, x++){
+        if (collisionMap[y][x] !== 0){
+          ctx.fillRect(offset.x + x * TILE_SIZE, offset.y + y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+        }
+      }
+    }
+  }
 
   // Smoothing factor for remote players and reconciliation on local
   const SMOOTH = 0.2; // [0..1] higher = faster snap
