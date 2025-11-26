@@ -23,8 +23,12 @@ fetch('collision.csv')
 
 
 // Load tileset PNG
+let tilesetLoaded = false;
 const tileset = new Image();
 tileset.src = 'map.png';
+tileset.onload = () => {
+  tilesetLoaded = true;
+};
 
 
 document.addEventListener('keydown', (e) => keys[e.key] = true);
@@ -34,9 +38,9 @@ document.addEventListener('keyup', (e) => keys[e.key] = false);
 // Rysowanie mapy
 // ====================
 function drawMap(){
-  if (!collisionMap.length) return;
+  if (!collisionMap.length || !tilesetLoaded) return;
 
-  const tilesPerRow = tileset.width / TILE_SIZE;
+  const tilesPerRow = Math.floor(tileset.width / TILE_SIZE);
 
    for (let y = 0; y < collisionMap.length; y++){
       for (let x = 0; x < collisionMap[0].length; x++){
