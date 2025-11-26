@@ -40,7 +40,7 @@ document.addEventListener('keyup', (e) => keys[e.key] = false);
 function drawMap(){
   if (!collisionMap.length || !tilesetLoaded) return;
 
-  const tilesPerRow = Math.floor(tileset.width / TILE_SIZE);
+  const tilesPerRow = tileset.width / TILE_SIZE;
 
    for (let y = 0; y < collisionMap.length; y++){
       for (let x = 0; x < collisionMap[0].length; x++){
