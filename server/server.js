@@ -104,9 +104,12 @@ setInterval(() => {
     let newX = p.x + p.dx * p.speed * dt;
     let newY = p.y + p.dy * p.speed * dt;
 
+    if (!colliding(newX, p.y)) p.x = newX;
+    if (!colliding(p.x, newY)) p.y = newY;
+  }
+
     // Collision with map
     function colliding(x, y){
-      const RARIUS = 10; // same as your player radius
       const left = x - RADIUS;
       const right = x + RADIUS;
       const top = y - RADIUS;
@@ -124,11 +127,10 @@ setInterval(() => {
           if (ty < 0 || ty >= collisionMap.length || tx < 0 || tx >= collisionMap[0].length) {
             return true; // outside map = collision
           }
-      return collisionMap[ty][tx] !== 0; // 0 = wall
+      if (collisionMap[ty][tx] === 0) return true; // 0 = wall
         }
         }
-    if (!colliding(newX, p.y)) p.x = newX;
-    if (!colliding(p.x, newY)) p.y = newY;
+    return false; //no collision detected
   }
 
 
@@ -168,7 +170,6 @@ setInterval(() => {
     const p = players[id];
     snapshot[id] = { id: p.id, x: p.x, y: p.y, color: p.color};
   }
-
   io.emit("stateUpdate", snapshot);
 }, FRAME_TIME);
 
