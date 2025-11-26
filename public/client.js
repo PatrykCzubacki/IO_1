@@ -112,7 +112,7 @@ function draw() {
   if (collisionMap.length){
     ctx.fillStyle = 'rgba(200,0,0,0.3)';
     for (let y = 0; y < collisionMap.length; y++){
-      for (let x = 0; x < collisionMap[0].length, x++){
+      for (let x = 0; x < collisionMap[0].length; x++){
         if (collisionMap[y][x] !== 0){
           ctx.fillRect(offset.x + x * TILE_SIZE, offset.y + y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
         }

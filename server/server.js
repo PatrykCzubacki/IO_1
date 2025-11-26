@@ -39,8 +39,8 @@ function getRandomSpawn(){
   } while (collisionMap[ty][tx] !== 0);
 
   return {
-    x: tx * TILE_SIZE + TILE_SIZE / 2;
-    y: ty * TILE_SIZE + TILE_SIZE / 2;
+    x: tx * TILE_SIZE + TILE_SIZE / 2,
+    y: ty * TILE_SIZE + TILE_SIZE / 2
   };
 }
 
