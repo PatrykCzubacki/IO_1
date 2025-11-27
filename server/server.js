@@ -18,7 +18,7 @@ app.use(express.static(path.join(__dirname, "..", "public")));
 // Load collision map CSV
 // =======================
 let collisionMap = [];
-const TILE_SIZE = 32; // Same as Tiled tileset
+const TILE_SIZE = 64; // Same as Tiled tileset
 
 const csvTest = fs.readFileSync(path.join(__dirname, '..', 'public', 'collision1.csv'), 'utf8')
 collisionMap = csvTest.trim().split('\n').map(r => r.split(',').map(Number));

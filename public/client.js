@@ -9,7 +9,7 @@ canvas.height = window.innerHeight;
 const keys = {};
 let renderPlayers = {}; // local rendered positions and smoothing info
 let collisionMap = [];
-let TILE_SIZE = 32;
+let TILE_SIZE = 64;
 
 // =================
 // Load collision map (same CSV)
