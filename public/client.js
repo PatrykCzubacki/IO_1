@@ -156,7 +156,7 @@ function draw() {
     // Draw
     ctx.fillStyle = r.color;
     ctx.beginPath();
-    ctx.arc(r.x, r.y, 10, 0, Math.PI * 2);
+    ctx.arc(r.x, r.y, 24, 0, Math.PI * 2);
     ctx.fill();
   }
   requestAnimationFrame(draw);
