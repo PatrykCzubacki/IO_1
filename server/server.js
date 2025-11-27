@@ -166,11 +166,11 @@ setInterval(() => {
 
         // After push, ensure A is not inside a wall
         if (!colliding(newAX,a.y)) a.x = newAX;
-        if (!colliding(ax, newAY)) a.y = newAY;
+        if (!colliding(a.x, newAY)) a.y = newAY;
 
         // After push, ensure B is not inside a wall
         if (!colliding(newBX,b.y)) b.x = newBX;
-        if (!colliding(Bx, newBY)) b.y = newBY;
+        if (!colliding(b.x, newBY)) b.y = newBY;
 
       }
     }
