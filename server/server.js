@@ -94,7 +94,7 @@ io.on('connection', (socket) => {
 
 const TICK_RATE = 60; // tick per second
 const FRAME_TIME = 1000 / TICK_RATE;   
-const RADIUS = 24;
+const RADIUS = 20;
 const DIAMETER = RADIUS * 2;
 
 setInterval(() => {
