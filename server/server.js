@@ -140,6 +140,7 @@ setInterval(() => {
   const ids = Object.keys(players);
   for(let i=0; i < ids.length; i++){
     for (let j = i + 1; j < ids.length; j++){
+
       const a = players[ids[i]];
       const b = players[ids[j]];
 
@@ -148,10 +149,13 @@ setInterval(() => {
       const distSq = dx * dx + dy * dy;
 
       if (distSq < DIAMETER * DIAMETER){
+
         const dist = Math.sqrt(distSq) || 0.01;
         const overlap = DIAMETER - dist;
         const nx = dx / dist;
         const ny = dy / dist;
+
+        // Split push
         const push = overlap / 2;
 
         // Attempt to push
@@ -160,15 +164,13 @@ setInterval(() => {
         const newBX = b.x - nx * push;
         const newBY = b.y - ny * push;
 
-        // Only move if NOT into wall
-        if (!colliding(newAX,newAY)){
-          a.x = newAX;
-          a.y = newAY;
-        }
-        if(!colliding(newBX, newBY)){
-          b.x = newBX;
-          b.y = newBY;
-        }
+        // After push, ensure A is not inside a wall
+        if (!colliding(newAX,a.y)) a.x = newAX;
+        if (!colliding(ax, newAY)) a.y = newAY;
+
+        // After push, ensure B is not inside a wall
+        if (!colliding(newBX,b.y)) b.x = newBX;
+        if (!colliding(Bx, newBY)) b.y = newBY;
 
       }
     }
