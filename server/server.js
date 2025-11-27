@@ -22,6 +22,7 @@ const TILE_SIZE = 32; // Same as Tiled tileset
 
 const csvTest = fs.readFileSync(path.join(__dirname, '..', 'public', 'collision1.csv'), 'utf8')
 collisionMap = csvTest.trim().split('\n').map(r => r.split(',').map(Number));
+
 const MAP_WIDTH = collisionMap[0].length * TILE_SIZE;
 const MAP_HEIGHT = collisionMap.length * TILE_SIZE;
 
@@ -153,11 +154,21 @@ setInterval(() => {
         const ny = dy / dist;
         const push = overlap / 2;
 
-        // Separate equally 
-        a.x += nx * push;
-        a.y += ny * push;
-        b.x -= nx * push;
-        b.y -= ny * push;
+        // Attempt to push
+        const newAX = a.x + nx * push;
+        const newAy = a.y + ny * push;
+        const newBX = b.x - nx * push;
+        const newBY = b.y - ny * push;
+
+        // Only move if NOT into wall
+        if (!colliding(newAX,newAY)){
+          a.x = newAX;
+          a.y = newAY;
+        }
+        if(!colliding(newBX, newBY)){
+          b.x = newBX;
+          b.y = newBY;
+        }
 
       }
     }
