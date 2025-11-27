@@ -156,7 +156,7 @@ setInterval(() => {
 
         // Attempt to push
         const newAX = a.x + nx * push;
-        const newAy = a.y + ny * push;
+        const newAY = a.y + ny * push;
         const newBX = b.x - nx * push;
         const newBY = b.y - ny * push;
 
