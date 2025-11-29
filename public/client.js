@@ -207,7 +207,30 @@ function draw() {
     // =========================
     // DRAW TEXT ABOVE PLAYER IF ACTIVE
     // =========================
+
     if (floatingText && me && fontLoaded){
+      let showText = false;
+
+      //Check distance to all other players
+      for (const id in renderPlayers){
+        if (id === socket.id) continue; // skip self
+        const other = renderPlayers[id];
+
+        // Distance between centers
+        const dx = me.x - other.x;
+        const dy = me.y - other.y;
+        const centerDistance = Math.sqrt(dx*dx + dy*dy);
+
+        // Edge-to-edge distance = centerDistance - radius1 - radius2
+        const edgeDistance = centerDistance - 20 - 20; // 20 = player radius
+
+        if (edgeDistance <= 40 && edgeDistance >= 0) {
+          showText = true;
+          break; // only need one player close enough
+        }
+      }
+
+      if (showText){
       // Animate font size from 0 to 20
       const elapsed = floatingText.duration - floatingText.timer;
       const maxSize = 48;
@@ -216,7 +239,7 @@ function draw() {
       ctx.textAlign = "center";
       ctx.fillStyle = "white";
       ctx.fillText(floatingText.text, me.x, me.y - 40);
-    
+      }
       // Update timer
       floatingText.timer -=16; // approx per frame
       if (floatingText.timer <= 0) floatingText = null;
