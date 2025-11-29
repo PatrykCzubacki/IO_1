@@ -151,6 +151,13 @@ function draw() {
     // Smoothly move to server position for all players
     r.x += (r.serverX - r.x) * SMOOTH;
     r.y += (r.serverY - r.y) * SMOOTH;
+
+    // Player invisibility on holding the Z key
+    if (r.isLocal && key["z"]){
+      ctx.globalApha = 0.0; // Invisible
+    } else {
+      ctx.globalApha = 1.0; // Normal
+    }
     
     
     // Draw
@@ -158,6 +165,8 @@ function draw() {
     ctx.beginPath();
     ctx.arc(r.x, r.y, 20, 0, Math.PI * 2);
     ctx.fill();
+
+    ctx.globalAlpha = 1.0; // Player visibility reset
   }
   requestAnimationFrame(draw);
 }
