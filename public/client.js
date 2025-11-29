@@ -59,7 +59,7 @@ if (key === 'x' && renderPlayers[socket.id]){
   const me = renderPlayers[socket.id];
   floatingText = {
     text: "BOOO!",
-    timer: 1000 // miliseconds
+    timer: 500 // miliseconds
   };
 }
 });
