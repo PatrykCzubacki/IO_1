@@ -161,10 +161,10 @@ socket.on("stateUpdate", snapshot => {
 // =====================
 setInterval(() => {
   let dx = 0, dy = 0;
-  if (keys['ArrowUp']) dy = -1;
-  if (keys['ArrowDown']) dy = 1;
-  if (keys['ArrowLeft']) dx = -1;
-  if (keys['ArrowRight']) dx = 1;
+  if (keys['arrowup']) dy = -1;
+  if (keys['arrowdown']) dy = 1;
+  if (keys['arrowleft']) dx = -1;
+  if (keys['arrowright']) dx = 1;
   if (dx !== 0 && dy !== 0){ const inv = 1/Math.sqrt(2); dx *= inv; dy *= inv; }
   socket.emit('playerMovement', { dx, dy });
 }, 1000/60); // send 60 times per second
