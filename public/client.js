@@ -59,7 +59,7 @@ if (key === 'x' && renderPlayers[socket.id]){
   const me = renderPlayers[socket.id];
   floatingText = {
     text: "BOOO!",
-    timer: 1000, // miliseconds
+    timer: 500, // miliseconds
     size: 0 // start at 0px
   };
 }
@@ -209,9 +209,9 @@ function draw() {
     // =========================
     if (floatingText && me){
       // Animate font size from 0 to 20
-      const elapsed = 1000 - floatingText.timer;
+      const elapsed = 500 - floatingText.timer;
       const maxSize = 48;
-      const size = Math.min(maxSize, (elapsed / 1000) * maxSize);
+      const size = Math.min(maxSize, (elapsed / 500) * maxSize);
       ctx.font = `${size}px SpookyFont`;
       ctx.textAlign = "center";
       ctx.fillStyle = "white";
