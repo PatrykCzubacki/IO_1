@@ -11,6 +11,11 @@ let renderPlayers = {}; // local rendered positions and smoothing info
 let collisionMap = [];
 let TILE_SIZE = 64;
 
+// =====================
+// FLOATING TEXT FOR LOCAL PLAYER
+// =====================
+let floatingText = null; // {text, x, y, timer}
+
 
 // =================
 // Load collision map (same CSV)
@@ -27,13 +32,38 @@ fetch('collision1.csv')
 let tilesetLoaded = false;
 const tileset = new Image();
 tileset.src = 'map.png';
-tileset.onload = () => {
-  tilesetLoaded = true;
-};
+tileset.onload = () => tilesetLoaded = true;
 
+// ====================
+// LOAD CUSTOM FONT
+// ====================
+const font = new FontFace('SpookyFont', 'url(../public/assets/fonts/RubikWetPaint-Regular.ttf)');
+font.load().then((loadedFont) => {
+  document.fonts.add(loadedFont);
+});
 
-document.addEventListener('keydown', (e) => keys[e.key] = true);
-document.addEventListener('keyup', (e) => keys[e.key] = false);
+// =====================
+// INPUT HANDLING
+// =====================
+
+document.addEventListener('keydown', (e) => {
+  keys[e.key.toLowerCase()] = true;
+
+// ========================
+// SHOW TEXT ABOVE PLAYER ON "X"
+// ========================
+if (e.key.toLowerCase() === 'x' && renderPlayers[socket.id]){
+  const me = renderPlayers[socket.id];
+  floatingText = {
+    text: "BOOO!",
+    x: me.x,
+    y: me.y - 30,
+    timer: 1000 // miliseconds
+  };
+}
+});
+
+document.addEventListener('keyup', (e) => keys[e.key].toLowerCase() = false);
 
 // ====================
 // Rysowanie mapy
@@ -135,18 +165,6 @@ setInterval(() => {
   socket.emit('playerMovement', { dx, dy });
 }, 1000/60); // send 60 times per second
 
-// ========================
-// SHOW TEST ABOVE PLAYER ON "X"
-// ========================
-document.addEventListener("keydown", (e) => {
-  if (e.key === "x"){
-    const me = renderPlayers[socket.id];
-    if(me){
-      me.text = "BOOO!";
-      me.textExpire = performance.now() + 2000; // 2 seconds
-    }
-  }
-});
 
 // ===================
 // DRAW LOOP
@@ -168,12 +186,7 @@ function draw() {
     r.y += (r.serverY - r.y) * SMOOTH;
 
     // Player invisibility on holding the Z key
-    if (r.isLocal && keys["z"]){
-      ctx.globalAlpha = 0.0; // Invisible
-    } else {
-      ctx.globalAlpha = 1.0; // Normal
-    }
-    
+    ctx.globalAlpha = (r.isLocal && keys['z']) ? 0.0 : 1.0;
     
     // Draw
     ctx.fillStyle = r.color;
@@ -186,12 +199,16 @@ function draw() {
     // =========================
     // DRAW TEXT ABOVE PLAYER IF ACTIVE
     // =========================
-    if (r.text && performance.now() < r.textExpire){
-      ctx.font = "20px Arial";
+    if (floatingText){
+      ctx.font = "20px 'SpookyFont', sans-serif";
       ctx.textAlign = "center";
       ctx.fillStyle = "white";
-      ctx.fillText(r.text, r.x, r.y - 40);
-    }
+      ctx.fillText(floatingText.text, floatingText.x, floatingText.y);
+    
+      // Update timer
+      floatingText.timer -=16; // approx per frame
+      if (floatingText.timer <= 0) floatingText = null;
+
   }
   requestAnimationFrame(draw);
 }
