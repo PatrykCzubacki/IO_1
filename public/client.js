@@ -59,7 +59,8 @@ if (key === 'x' && renderPlayers[socket.id]){
   const me = renderPlayers[socket.id];
   floatingText = {
     text: "BOOO!",
-    timer: 500 // miliseconds
+    timer: 1000 // miliseconds
+    size: 0 // start at 0px
   };
 }
 });
@@ -207,7 +208,11 @@ function draw() {
     // DRAW TEXT ABOVE PLAYER IF ACTIVE
     // =========================
     if (floatingText && me){
-      ctx.font = "26px SpookyFont";
+      // Animate font size from 0 to 20
+      const elapsed = 1000 - floatingText.timer;
+      const maxSize = 48;
+      const size = Math.min(maxSize, (elapsed / 1000) * maxSize);
+      ctx.font = `${size}px SpookyFont`;
       ctx.textAlign = "center";
       ctx.fillStyle = "white";
       ctx.fillText(floatingText.text, me.x, me.y - 40);
