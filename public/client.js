@@ -224,7 +224,7 @@ function draw() {
         // Edge-to-edge distance = centerDistance - radius1 - radius2
         const edgeDistance = centerDistance - 20 - 20; // 20 = player radius
 
-        if (edgeDistance <= 40 && edgeDistance >= 0) {
+        if (edgeDistance <= 40) {
           showText = true;
           break; // only need one player close enough
         }
