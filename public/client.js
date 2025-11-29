@@ -38,12 +38,10 @@ tileset.onload = () => tilesetLoaded = true;
 // LOAD CUSTOM FONT
 // ====================
 const spookyFont = new FontFace('SpookyFont', 'url(assets/fonts/RubikWetPaint-Regular.ttf)');
-font.load().then((loadedFont) => {
-  document.fonts.add(loadedFont);
-});
 
 spookyFont.load().then(font => {
   document.fonts.add(font);
+  console.log("Custom font loaded.");
 });
 
 // =====================
