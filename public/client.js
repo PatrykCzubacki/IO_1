@@ -11,6 +11,7 @@ let renderPlayers = {}; // local rendered positions and smoothing info
 let collisionMap = [];
 let TILE_SIZE = 64;
 
+
 // =================
 // Load collision map (same CSV)
 // =================
@@ -75,7 +76,9 @@ function ensureRender(id, serverObj){
       color: serverObj.color || '#888',
       serverX: serverObj.x,
       serverY: serverObj.y,
-      isLocal: id === socket.id
+      isLocal: id === socket.id,
+      text: "",
+      textExpire: 0
     };
   } else {
     renderPlayers[id].serverX = serverObj.x;
@@ -119,7 +122,7 @@ socket.on("stateUpdate", snapshot => {
   }
   });
 
-   // =====================
+// =====================
 // INPUT SENDING LOOP
 // =====================
 setInterval(() => {
@@ -132,6 +135,18 @@ setInterval(() => {
   socket.emit('playerMovement', { dx, dy });
 }, 1000/60); // send 60 times per second
 
+// ========================
+// SHOW TEST ABOVE PLAYER ON "X"
+// ========================
+document.addEventListener("keydown", (e) => {
+  if (e.key === "x"){
+    const me = renderPlayers[socket.id];
+    if(me){
+      me.text = "BOOO!";
+      me.textExpire = performance.now() + 2000; // 2 seconds
+    }
+  }
+});
 
 // ===================
 // DRAW LOOP
@@ -167,6 +182,16 @@ function draw() {
     ctx.fill();
 
     ctx.globalAlpha = 1.0; // Player visibility reset
+  
+    // =========================
+    // DRAW TEXT ABOVE PLAYER IF ACTIVE
+    // =========================
+    if (r.text && performance.now() < r.textExpire){
+      ctx.font = "20px Arial";
+      ctx.textAlign = "center";
+      ctx.fillStyle = "white";
+      ctx.fillText(r.text, r.x, r.y - 40);
+    }
   }
   requestAnimationFrame(draw);
 }
