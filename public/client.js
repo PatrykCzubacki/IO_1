@@ -14,7 +14,7 @@ let TILE_SIZE = 64;
 // =====================
 // FLOATING TEXT FOR LOCAL PLAYER
 // =====================
-let floatingText = null; // {text, x, y, timer}
+let floatingText = null; // {text, timer}
 
 
 // =================
@@ -37,9 +37,13 @@ tileset.onload = () => tilesetLoaded = true;
 // ====================
 // LOAD CUSTOM FONT
 // ====================
-const font = new FontFace('SpookyFont', 'url(../public/assets/fonts/RubikWetPaint-Regular.ttf)');
+const spookyFont = new FontFace('SpookyFont', 'url(assets/fonts/RubikWetPaint-Regular.ttf)');
 font.load().then((loadedFont) => {
   document.fonts.add(loadedFont);
+});
+
+spookyFont.load().then(font => {
+  document.fonts.add(font);
 });
 
 // =====================
@@ -47,23 +51,25 @@ font.load().then((loadedFont) => {
 // =====================
 
 document.addEventListener('keydown', (e) => {
-  keys[e.key.toLowerCase()] = true;
+  const key = e.key.toLowerCase();
+  keys[key] = true;
 
 // ========================
 // SHOW TEXT ABOVE PLAYER ON "X"
 // ========================
-if (e.key.toLowerCase() === 'x' && renderPlayers[socket.id]){
+if (key === 'x' && renderPlayers[socket.id]){
   const me = renderPlayers[socket.id];
   floatingText = {
     text: "BOOO!",
-    x: me.x,
-    y: me.y - 30,
     timer: 1000 // miliseconds
   };
 }
 });
 
-document.addEventListener('keyup', (e) => keys[e.key].toLowerCase() = false);
+document.addEventListener('keyup', (e) => {
+  const key = e.key.toLowerCase();
+  keys[key] = false;
+});
 
 // ====================
 // Rysowanie mapy
@@ -178,6 +184,9 @@ function draw() {
   // Smoothing factor for remote players and reconciliation on local
   const SMOOTH = 0.2; // [0..1] higher = faster snap
 
+  // Track local player for floating text
+  const me = renderPlayers[socket.id];
+
   for (const id in renderPlayers) {
     const r = renderPlayers[id];
 
@@ -195,15 +204,15 @@ function draw() {
     ctx.fill();
 
     ctx.globalAlpha = 1.0; // Player visibility reset
-  
+  }
     // =========================
     // DRAW TEXT ABOVE PLAYER IF ACTIVE
     // =========================
-    if (floatingText){
-      ctx.font = "20px 'SpookyFont', sans-serif";
+    if (floatingText && me){
+      ctx.font = "26px SpookyFont";
       ctx.textAlign = "center";
       ctx.fillStyle = "white";
-      ctx.fillText(floatingText.text, floatingText.x, floatingText.y);
+      ctx.fillText(floatingText.text, me.x, me.y - 40);
     
       // Update timer
       floatingText.timer -=16; // approx per frame
