@@ -60,8 +60,8 @@ document.addEventListener('keydown', (e) => {
 if (key === 'x' && renderPlayers[socket.id]){
   floatingText = {
     text: "BOOO!",
-    timer: 500, // miliseconds
-    duration: 500 // store original duration
+    timer: 250, // current remaining time in ms
+    duration: 250 // total time for animation in ms
   };
 }
 });
