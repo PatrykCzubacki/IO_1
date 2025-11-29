@@ -153,10 +153,10 @@ function draw() {
     r.y += (r.serverY - r.y) * SMOOTH;
 
     // Player invisibility on holding the Z key
-    if (r.isLocal && key["z"]){
-      ctx.globalApha = 0.0; // Invisible
+    if (r.isLocal && keys["z"]){
+      ctx.globalAlpha = 0.0; // Invisible
     } else {
-      ctx.globalApha = 1.0; // Normal
+      ctx.globalAlpha = 1.0; // Normal
     }
     
     
