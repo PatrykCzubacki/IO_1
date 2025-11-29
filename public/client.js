@@ -38,9 +38,11 @@ tileset.onload = () => tilesetLoaded = true;
 // LOAD CUSTOM FONT
 // ====================
 const spookyFont = new FontFace('SpookyFont', 'url(assets/fonts/RubikWetPaint-Regular.ttf)');
+let fontLoaded = false;
 
 spookyFont.load().then(font => {
   document.fonts.add(font);
+  fontLoaded = true;
   console.log("Custom font loaded.");
 });
 
@@ -56,11 +58,10 @@ document.addEventListener('keydown', (e) => {
 // SHOW TEXT ABOVE PLAYER ON "X"
 // ========================
 if (key === 'x' && renderPlayers[socket.id]){
-  const me = renderPlayers[socket.id];
   floatingText = {
     text: "BOOO!",
     timer: 500, // miliseconds
-    size: 0 // start at 0px
+    duration: 500 // store original duration
   };
 }
 });
@@ -85,7 +86,6 @@ function drawMap(){
 
         // tileId 0 = first tile in tileset (top-left)
         const tileIndex = tileId;
-
         const sx = (tileIndex % tilesPerRow) * TILE_SIZE;
         const sy = Math.floor(tileIndex / tilesPerRow) * TILE_SIZE;
 
@@ -207,11 +207,11 @@ function draw() {
     // =========================
     // DRAW TEXT ABOVE PLAYER IF ACTIVE
     // =========================
-    if (floatingText && me){
+    if (floatingText && me && fontLoaded){
       // Animate font size from 0 to 20
-      const elapsed = 500 - floatingText.timer;
+      const elapsed = floatingText.duration - floatingText.timer;
       const maxSize = 48;
-      const size = Math.min(maxSize, (elapsed / 500) * maxSize);
+      const size = Math.min(maxSize, (elapsed / floatingText.duration) * maxSize);
       ctx.font = `${size}px SpookyFont`;
       ctx.textAlign = "center";
       ctx.fillStyle = "white";
