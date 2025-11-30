@@ -51,16 +51,23 @@ spookyFont.load().then(font => {
 // =========================
 
 // Function that sets floating text
-function triggerFloatingText(text, timer, duration){
-  floatingText = { text, timer, duration};
+function triggerFloatingText(text, duration, visibleIfNearby){
+  floatingText = { 
+    text,
+    start: performance.now(),
+    duration,
+    visibleIfNearby // if true: show only when someone is near; if false: show only when nobody is near 
+  };
 }
 
 // Function that decides WHICH text to display
 function getDynamicMessage(){
   const me = renderPlayers[socket.id];
-  if (!me) return { text: "", timer: 0, duration: 0};
+  if (!me) return { text: "B-booo?...", duration: 400, visibleIfNearby: false};
   
-  let someoneClose = false;
+  let minEdgeDistance = Infinity;
+  const myRadius = 20;
+  const threirRadius = 20;
 
   for (const id in renderPlayers){
     if(id === socket.id) continue;
@@ -68,17 +75,14 @@ function getDynamicMessage(){
 
     const dx = me.x - other.x;
     const dy = me.y - other.y;
-    const centerDist = Math.sqrt(dx * dx + dy * dy);
-    const edgeDist = centerDist - 20 - 20;
-
-    if (edgeDist <= 40) {
-      someoneClose = true;
-      break;
-    }
+    const centerDist = Math.hypot(dx,dy);
+    const edgeDist = centerDist - myRadius - threirRadius;
+    if (edgeDist < minEdgeDistance) minEdgeDistance = edgeDist;
   }
 
-
-  if (someoneClose){
+// If there's at least one other player and the nearest edge distance <= 40 → "BOOO!"
+  // Otherwise show the alternative message. Note: edgeDist can be negative when overlapping.
+  if (minEdgeDistance !== Infinity && minEdgeDistance <= 40){
     return { text: "BOOO!", timer: 350, duration: 350};
   } else {
     return { text: "B-booo?...", timer: 700, duration: 700};
