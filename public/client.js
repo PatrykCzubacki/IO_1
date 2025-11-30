@@ -61,12 +61,12 @@ function getDynamicMessage(){
   let someoneClose = false;
 
   for (const id in renderPlayers){
-    if(id === socket.id) contrinue;
+    if(id === socket.id) continue;
     const other = renderPlayers[id];
 
     const dx = me.x - other.x;
     const dy = me.y - other.y;
-    const dist = Math.sqrt(dx * dx, dy * dy);
+    const dist = Math.sqrt(dx * dx + dy * dy);
 
     if (dist <= 40) someoneClose = true;
   }
