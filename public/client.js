@@ -46,6 +46,39 @@ spookyFont.load().then(font => {
   console.log("Custom font loaded.");
 });
 
+// =========================
+// NEW SYSTEM FOR TEXT
+// =========================
+
+// Function that sets floating text
+function triggerFloatingText(text, timer, duration){
+  floatingText = { text, timer, duration};
+}
+
+// Function that decides WHICH text to display
+function getDynamicMessage(){
+  const me = renderPlayers[socket.id];
+  let someoneClose = false;
+
+  for (const id in renderPlayers){
+    if(id === socket.id) contrinue;
+    const other = renderPlayers[id];
+
+    const dx = me.x - other.x;
+    const dy = me.y - other.y;
+    const dist = Math.sqrt(dx * dx, dy * dy);
+
+    if (dist <= 40) someoneClose = true;
+  }
+
+  if (someoneClose){
+    return { text: "BOOO!", timer: 350, duration: 350};
+  } else {
+    return { text: "B-booo?...", timer: 700, duration: 700};
+  }
+}
+
+
 // =====================
 // INPUT HANDLING
 // =====================
@@ -58,11 +91,8 @@ document.addEventListener('keydown', (e) => {
 // SHOW TEXT ABOVE PLAYER ON "X"
 // ========================
 if (key === 'x' && renderPlayers[socket.id]){
-  floatingText = {
-    text: "BOOO!",
-    timer: 400, // current remaining time in ms
-    duration: 400 // total time for animation in ms
-  };
+  const msg = getDynamicMessage();
+  triggerFloatingText(msg.text, msg.timer, msg.duration);
 }
 });
 
