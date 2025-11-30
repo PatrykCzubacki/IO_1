@@ -58,6 +58,8 @@ function triggerFloatingText(text, timer, duration){
 // Function that decides WHICH text to display
 function getDynamicMessage(){
   const me = renderPlayers[socket.id];
+  if (!me) return { text: "", timer: 0, duration: 0};
+  
   let someoneClose = false;
 
   for (const id in renderPlayers){
@@ -66,10 +68,15 @@ function getDynamicMessage(){
 
     const dx = me.x - other.x;
     const dy = me.y - other.y;
-    const dist = Math.sqrt(dx * dx + dy * dy);
+    const centerDist = Math.sqrt(dx * dx + dy * dy);
+    const edgeDist = centerDist - 20 - 20;
 
-    if (dist <= 40) someoneClose = true;
+    if (edgeDist <= 40) {
+      someoneClose = true;
+      break;
+    }
   }
+
 
   if (someoneClose){
     return { text: "BOOO!", timer: 350, duration: 350};
