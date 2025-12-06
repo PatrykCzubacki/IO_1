@@ -285,7 +285,7 @@ function draw() {
   
       if (showText){
       // Animate font size from 0 to 20
-      const maxSize = 48;
+      const maxSize = (floatingText.text === "B-booo?...") ? 24 : 48;
       const size = Math.min(maxSize, (elapsed / floatingText.duration) * maxSize);
       ctx.font = `${size}px SpookyFont`;
       ctx.textAlign = "center";
