@@ -103,7 +103,7 @@ document.addEventListener('keydown', (e) => {
 // ========================
 if (key === 'x' && renderPlayers[socket.id]){
   const msg = getDynamicMessage();
-  triggerFloatingText(msg.text, msg.timer, msg.duration);
+  triggerFloatingText(msg.text, msg.timer, false);
 }
 });
 
@@ -250,27 +250,31 @@ function draw() {
     // =========================
 
     if (floatingText && me && fontLoaded){
-      let showText = false;
+      let showText = true;
 
-      //Check distance to all other players
-      for (const id in renderPlayers){
-        if (id === socket.id) continue; // skip self
-        const other = renderPlayers[id];
+      // If visibleIfNearby is true, only show when a player is nearby
+      if (floatingText.visibleIfNearby){
+        showText = false;
+        //Check distance to all other players
+        for (const id in renderPlayers){
+          if (id === socket.id) continue; // skip self
+          const other = renderPlayers[id];
 
-        // Distance between centers
-        const dx = me.x - other.x;
-        const dy = me.y - other.y;
-        const centerDistance = Math.sqrt(dx*dx + dy*dy);
+          // Distance between centers
+          const dx = me.x - other.x;
+          const dy = me.y - other.y;
+          const centerDistance = Math.sqrt(dx*dx + dy*dy);
 
-        // Edge-to-edge distance = centerDistance - radius1 - radius2
-        const edgeDistance = centerDistance - 20 - 20; // 20 = player radius
+          // Edge-to-edge distance = centerDistance - radius1 - radius2
+          const edgeDistance = centerDistance - 20 - 20; // 20 = player radius
 
-        if (edgeDistance <= 40) {
-          showText = true;
-          break; // only need one player close enough
+          if (edgeDistance <= 40) {
+            showText = true;
+            break; // only need one player close enough
+          }
         }
-      }
-
+      }    
+  
       if (showText){
       // Animate font size from 0 to 20
       const elapsed = floatingText.duration - floatingText.timer;
