@@ -54,9 +54,9 @@ spookyFont.load().then(font => {
 function triggerFloatingText(text, duration, visibleIfNearby){
   floatingText = { 
     text,
-    start: performance.now(),
-    duration,
-    visibleIfNearby // if true: show only when someone is near; if false: show only when nobody is near 
+    start: performance.now(), // start time
+    duration,                 // duration in ms
+    visibleIfNearby           // if true: show only when someone is near; if false: show only when nobody is near 
   };
 }
 
@@ -250,7 +250,15 @@ function draw() {
     // =========================
 
     if (floatingText && me && fontLoaded){
-      let showText = true;
+      const now = performance.now();
+      const elapsed = now - floatingText.start;
+      
+      // Check if the floating text should disappear
+      if (elapsed > floatingText.duration){
+        floatingText = null;
+      } else {
+        let showText = true;
+      
 
       // If visibleIfNearby is true, only show when a player is nearby
       if (floatingText.visibleIfNearby){
@@ -277,7 +285,6 @@ function draw() {
   
       if (showText){
       // Animate font size from 0 to 20
-      const elapsed = floatingText.duration - floatingText.timer;
       const maxSize = 48;
       const size = Math.min(maxSize, (elapsed / floatingText.duration) * maxSize);
       ctx.font = `${size}px SpookyFont`;
@@ -285,9 +292,7 @@ function draw() {
       ctx.fillStyle = "white";
       ctx.fillText(floatingText.text, me.x, me.y - 40);
       }
-      // Update timer
-      floatingText.timer -=16; // approx per frame
-      if (floatingText.timer <= 0) floatingText = null;
+    }
 
   }
   requestAnimationFrame(draw);
